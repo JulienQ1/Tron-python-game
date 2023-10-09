@@ -5,5 +5,4 @@ Students:
 - Wu Yedong
 - Keith Udani
 - Antoine Martinet
-
-Features: 
+- Features: 
