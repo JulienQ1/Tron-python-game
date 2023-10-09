@@ -4,6 +4,6 @@ Students:
 - Julien Quenneville
 - Wu Yedong
 - Keith Udani
- -Antoine Martinet
+- Antoine Martinet
 Features:
 -
