@@ -1,9 +1,9 @@
 # Tron-python-game
 
-Students:
+Students: 
 - Julien Quenneville
 - Wu Yedong
 - Keith Udani
 - Antoine Martinet
 
-Feature
+Features: 
