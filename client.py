@@ -23,12 +23,18 @@ while startGame == False:
     font2 = pygame.font.Font('freesansbold.ttf', 36)
     startLabel = font.render('Tron Game - CreaTech', 1, (WHITE))
     label2 = font2.render('Press SHIFT to start!', 1, (WHITE))
+    quit_label = font2.render('Press Q to quit', 1, (WHITE))
     for event in pygame.event.get():
         keyState = pygame.key.get_pressed()
         if keyState[pygame.K_RSHIFT] or keyState[pygame.K_LSHIFT]:
             startGame = True
+        if keyState[pygame.K_q]:  # Ajout de la logique de sortie
+            pygame.quit()
+            client.close()
+            exit()
         screen.blit(startLabel, (65, 225))
         screen.blit(label2, (170, 450))
+        screen.blit(quit_label, (200, 500))
         pygame.display.flip()
 
 
