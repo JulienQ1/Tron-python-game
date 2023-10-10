@@ -15,7 +15,12 @@ clock = pygame.time.Clock()
 # Couleurs
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
-
+def quit():
+    global quit_game
+    quit_game = True
+    client.send(b'quit') 
+    
+    
 startGame = False
 while startGame == False:
     screen.fill(BLACK)
@@ -86,3 +91,6 @@ while running:
 
 pygame.quit()
 client.close()
+
+# En fin de partie, vous pouvez également appeler la fonction quit() pour quitter proprement
+quit()
