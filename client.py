@@ -11,6 +11,7 @@ LOGIN_FAIL = "login_fail"
 FPS = 60 #how many loops every second
 USER_NUMBER = 4
 START = "game_start" #start signal provide by server
+STOP = "game_stop"#stop signal provide by server
 
 # make an object of socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -61,11 +62,21 @@ while True:
     start_time = time.time() # Record the time of the loop start
     #put the main boday of our game below
 
+
+    #below and first line for make sure loop FPS time every second.
     passed_time = time.time() - start_time
     target_dureation = 1/FPS
     if passed_time < target_dureation:
         time.sleep(target_dureation-passed_time)
-        
+    #give information that the game need to be optimized as it couldn't run according to FPS
+    else:
+        print("please optimise the game")
+        break
+    #Stop the game if server send a stop signal
+    data_end = client_socket.recv(1024).decode('utf-8')
+    if data_end == STOP:
+        break
+
 
 
 def login(user_nam,connection):#a function to get username and compare with the server
