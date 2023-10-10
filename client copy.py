@@ -37,6 +37,20 @@ STOP = "game_stop"#stop signal provide by server
 #server_address = (SERVER_IP, SERVER_PORT)
 #client_socket.connect(server_address)
 
+
+#init pygame and give a window
+pygame.init()
+screen = pygame.display.set_mode((800, 600))
+
+#import some resources
+player_images = {
+    "A": pygame.image.load("MA.png").convert_alpha(),
+    "B": pygame.image.load("MB.png").convert_alpha(),
+    "C": pygame.image.load("MC.png").convert_alpha(),
+    "D": pygame.image.load("MD.png").convert_alpha()
+}
+
+
 #to define some figure
 
 def login_screen(screen, font):
@@ -150,6 +164,11 @@ def draw_waiting_screen(player_code):
     text_rect = waiting_text.get_rect(center=(400, 300))  # 居中定位
     screen.blit(waiting_text, text_rect)
 
+    # 在右下角显示玩家图片
+    if player_code in player_images:
+        player_img = pygame.transform.scale(player_images[player_code], (80, 40))
+        screen.blit(player_img, (720, 560))  # 从右边界和底部边界10像素的位置开始
+
     pygame.display.flip()  # 更新显示内容
 
 
@@ -157,8 +176,7 @@ def draw_waiting_screen(player_code):
 #login procedure
 print("Welcom to our game")
 
-#init pygame and give a window
-pygame.init()
+
 
 #define the font of text
 font = pygame.font.Font(None, 36)
@@ -173,7 +191,7 @@ client_socket.connect(server_address)
 
 while True:
 
-    screen = pygame.display.set_mode((500, 500))  # Assuming this is your screen size
+      # Assuming this is your screen size
     font = pygame.font.Font(None, 36)  # Assuming this is your font
 
     username = login_screen(screen, font)
@@ -237,3 +255,4 @@ while True:
     data_end = client_socket.recv(1024).decode('utf-8')
     if data_end == STOP:
         break
+client_socket.close()

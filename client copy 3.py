@@ -286,11 +286,6 @@ while True:
     start_time = time.time()
     screen.fill((0, 0, 0))  # 清除屏幕内容
 
-    # 在屏幕中间显示灰色矩形
-    center_x = (screen.get_width() - 600) // 2
-    center_y = (screen.get_height() - 600) // 2
-    pygame.draw.rect(screen, (128, 128, 128), (center_x, center_y, 600, 600))
-
     # 在trail_surface上更新轨迹
     player_positions = get_player_positions_from_server(client_socket)
     if player_positions:
@@ -303,6 +298,8 @@ while True:
 
     # 画trail_surface到主屏幕上
     screen.blit(trail_surface, (0, 0))
+
+    
 
     # 在主屏幕上绘制玩家的角色图片（只绘制当前的位置，不会绘制轨迹）
     for player_code, (x, y) in player_positions.items():
@@ -335,6 +332,5 @@ while True:
     data_end = client_socket.recv(1024).decode('utf-8')
     if data_end == STOP:
         break
-
 
 client_socket.close()

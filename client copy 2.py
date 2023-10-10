@@ -270,11 +270,6 @@ while True:
 
 #main loop below
 
-# 在屏幕中间显示灰色矩形
-center_x = (screen.get_width() - 600) // 2
-center_y = (screen.get_height() - 600) // 2
-pygame.draw.rect(screen, (128, 128, 128), (center_x, center_y, 600, 600))
-
 # make a new Surface to draw the trace
 trail_surface = pygame.Surface(screen.get_size())
 trail_surface.set_colorkey((0, 0, 0))  # 设置颜色键，以使其透明
@@ -283,13 +278,47 @@ trail_surface.fill((0, 0, 0))
 # main loop
 
 while True:
-    start_time = time.time()
-    screen.fill((0, 0, 0))  # 清除屏幕内容
+    start_time = time.time() # Record the time of the loop start
+    #put the main boday of our game below
 
-    # 在屏幕中间显示灰色矩形
-    center_x = (screen.get_width() - 600) // 2
-    center_y = (screen.get_height() - 600) // 2
-    pygame.draw.rect(screen, (128, 128, 128), (center_x, center_y, 600, 600))
+    #main body below
+    screen.fill((0, 0, 0))
+    # Fill the center with deep blue
+    pygame.draw.rect(screen, (0, 0, 128), (100, 0, 600, 600))
+    
+    # Get player positions from the server and draw them on the screen
+    player_positions = get_player_positions_from_server(client_socket)
+    if player_positions:
+        for player_code, (x, y) in player_positions.items():
+            if player_code in player_images:
+                player_img = pygame.transform.scale(player_images[player_code], (40, 20))
+                screen.blit(player_img, (x, y))
+                # Draw a line between the previous position and current position
+                if previous_positions[player_code]:
+                    prev_x, prev_y = previous_positions[player_code]
+                    pygame.draw.line(screen, player_colors[player_code], (prev_x + 20, prev_y + 10), (x + 20, y + 10), 2)
+                previous_positions[player_code] = (x, y)  # update the previous position
+
+    # Display player code and image in the bottom corners
+    #draw_player_info(player_code)
+
+    # Handle pygame events
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            client_socket.close()
+            exit()
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                send_movement_to_server("UP", client_socket)
+            elif event.key == pygame.K_DOWN:
+                send_movement_to_server("DOWN", client_socket)
+            elif event.key == pygame.K_LEFT:
+                send_movement_to_server("LEFT", client_socket)
+            elif event.key == pygame.K_RIGHT:
+                send_movement_to_server("RIGHT", client_socket)
+
+    # ... other parts of your main loop ...
 
     # 在trail_surface上更新轨迹
     player_positions = get_player_positions_from_server(client_socket)
@@ -304,37 +333,28 @@ while True:
     # 画trail_surface到主屏幕上
     screen.blit(trail_surface, (0, 0))
 
-    # 在主屏幕上绘制玩家的角色图片（只绘制当前的位置，不会绘制轨迹）
+    # 然后在主屏幕上绘制玩家的角色图片
     for player_code, (x, y) in player_positions.items():
         if player_code in player_images:
             player_img = pygame.transform.scale(player_images[player_code], (40, 20))
             screen.blit(player_img, (x, y))
-    
-    # 在左下角显示玩家的代码
-    font = pygame.font.SysFont(None, 36)
-    for player_code in player_positions.keys():
-        label = font.render(f"Player: {player_code}", True, (255, 255, 255))
-        screen.blit(label, (10, screen.get_height() - label.get_height() - 10))
-    
-    # 在右下角显示玩家代码对应的图片
-    for player_code in player_positions.keys():
-        if player_code in player_images:
-            player_img = pygame.transform.scale(player_images[player_code], (100, 50))
-            screen.blit(player_img, (screen.get_width() - 110, screen.get_height() - 60))
 
-    pygame.display.flip()  # 更新显示内容
+    # ... rest of your drawing and handling code ...
+
+    
+    pygame.display.flip()
 
     # Rest of the main loop ...
 
-    # 保证循环固定FPS运行
+    pygame.display.flip()
+
+    #below and first line for make sure loop FPS time every second.
     passed_time = time.time() - start_time
-    target_duration = 1/FPS
-    if passed_time < target_duration:
-        time.sleep(target_duration-passed_time)
+    target_dureation = 1/FPS
+    if passed_time < target_dureation:
+        time.sleep(target_dureation-passed_time)
 
     data_end = client_socket.recv(1024).decode('utf-8')
     if data_end == STOP:
         break
-
-
 client_socket.close()
