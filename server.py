@@ -1,47 +1,35 @@
 import socket
 
-# Constants
+# Server constants
 SERVER_IP = "127.0.0.1"
-SERVER_PORT = 0000
+SERVER_PORT = 6859
+ALLOWED_USERNAMES = ["1234", "5678", "9012", "3456"]
 LOGIN_SUC = "login_success"
 LOGIN_FAIL = "login_fail"
-USER_NUMBER = 4
-START = "game_start"
-STOP = "game_stop"
 
-# Create a server socket
+# Create a socket object
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_address = (SERVER_IP, SERVER_PORT)
-server_socket.bind(server_address)
-server_socket.listen(USER_NUMBER)
 
-print("Server started and waiting for clients to connect...")
+# Bind the socket to the IP and port
+server_socket.bind((SERVER_IP, SERVER_PORT))
 
-# List to keep track of client sockets
-clients = []
+# Listen for incoming connections
+server_socket.listen(5) # 5 is the maximum number of queued connections
+print(f"Server started on {SERVER_IP}:{SERVER_PORT}, waiting for connections...")
 
-# Accept connections from clients
-while len(clients) < USER_NUMBER:
+while True:
+    # Accept a new connection
     client_socket, client_address = server_socket.accept()
-    print(f"Connection established with {client_address}")
-    clients.append(client_socket)
-    
-    # Receive username from the client
-    username = client_socket.recv(1024).decode('utf-8')
-    
-    # For simplicity, let's assume every username is valid and just send a success message
-    client_socket.sendall(LOGIN_SUC.encode('utf-8'))
-    
-print("All expected users connected. Starting the game...")
+    print(f"Connection from {client_address}")
 
-# Send start message to all clients
-for client in clients:
-    client.sendall(START.encode('utf-8'))
+    # Receive the username from the client
+    data = client_socket.recv(1024).decode('utf-8')
 
-# Assume the game runs for some time, and then...
-# Send stop message to all clients
-for client in clients:
-    client.sendall(STOP.encode('utf-8'))
+    # Check if the username is in the allowed list
+    if data in ALLOWED_USERNAMES:
+        client_socket.sendall(LOGIN_SUC.encode('utf-8'))
+    else:
+        client_socket.sendall(LOGIN_FAIL.encode('utf-8'))
 
-# Close the server socket
-server_socket.close()
+    # Close the connection
+    client_socket.close()

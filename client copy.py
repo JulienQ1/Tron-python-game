@@ -3,9 +3,9 @@ import socket
 import time #to count and control the time of a loop
 
 SERVER_IP = "127.0.0.1" #The IP of the server
-SERVER_PORT = 0000 #The port used of server
+SERVER_PORT = 6859 #The port used of server
 CLIENT_IP = "127.0.0.1" #The IP of client
-CLIENT_PORT = 0000 #The port used by client
+CLIENT_PORT = 6859 #The port used by client
 LOGIN_SUC = "login_success" #The message given by server that means username is right
 LOGIN_FAIL = "login_fail"
 FPS = 60 #how many loops every second
@@ -36,6 +36,86 @@ STOP = "game_stop"#stop signal provide by server
 #client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #server_address = (SERVER_IP, SERVER_PORT)
 #client_socket.connect(server_address)
+
+#to define some figure
+
+def login_screen(screen, font):
+    username = ''
+    screen_width, screen_height = screen.get_size()  # 获取屏幕尺寸
+
+    # 渲染 "Please enter the user name:" 文本
+    prompt_text_surface = font.render('Please enter the user name:', True, (255, 255, 255))
+    prompt_text_width, prompt_text_height = prompt_text_surface.get_size()  # 获取文本尺寸
+
+    # 计算文本和输入框的位置以居中它们
+    prompt_text_position_x = (screen_width - prompt_text_width) / 2
+    prompt_text_position_y = (screen_height / 2) - prompt_text_height - 10
+
+    input_box_width = 200  # 可以根据您的需求进行调整
+    input_box_height = 32
+    input_box_x = (screen_width - input_box_width) / 2
+    input_box_y = screen_height / 2
+
+    input_box = pygame.Rect(input_box_x, input_box_y, input_box_width, input_box_height)
+    color_inactive = pygame.Color('lightskyblue3')
+    color_active = pygame.Color('dodgerblue2')
+    color = color_inactive
+    active = False
+    running = True
+
+    while running:
+        screen.fill((0, 0, 0))
+
+        # 绘制文本和输入框
+        screen.blit(prompt_text_surface, (prompt_text_position_x, prompt_text_position_y))
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                return None  # Return None if user closes the window
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if input_box.collidepoint(event.pos):
+                    active = not active
+                else:
+                    active = False
+                color = color_active if active else color_inactive
+            if event.type == pygame.KEYDOWN:
+                if active:
+                    if event.key == pygame.K_RETURN:
+                        return username  # Return the username if the user presses enter
+                    elif event.key == pygame.K_BACKSPACE:
+                        username = username[:-1]
+                    else:
+                        username += event.unicode
+
+        txt_surface = font.render(username, True, color)
+        width = max(200, txt_surface.get_width() + 10)
+        input_box.w = width
+        screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
+        pygame.draw.rect(screen, color, input_box, 2)
+
+        pygame.display.flip()
+
+    pygame.quit()
+
+def login(user_nam,connection):#a function to get username and compare with the server
+    # send user_name to server
+    connection.sendall(user_nam.encode('utf-8'))
+        
+    # get response from server
+    data = connection.recv(1024).decode('utf-8')
+        
+    if data == LOGIN_SUC:
+        print("success")
+        return "suc"
+    elif data == LOGIN_FAIL:
+        print("fail")
+        return "fail"
+    else:
+        print("Unexpected server response")
+        return "error"
+
+
 
 #login procedure
 print("Welcom to our game")
@@ -110,63 +190,3 @@ while True:
     data_end = client_socket.recv(1024).decode('utf-8')
     if data_end == STOP:
         break
-
-
-
-def login(user_nam,connection):#a function to get username and compare with the server
-    # send user_name to server
-    connection.sendall(user_nam.encode('utf-8'))
-        
-    # get response from server
-    data = connection.recv(1024).decode('utf-8')
-        
-    if data == LOGIN_SUC:
-        print("success")
-        return "suc"
-    elif data == LOGIN_FAIL:
-        print("fail")
-        return "fail"
-    else:
-        print("Unexpected server response")
-        return "error"
-    
-def login_screen(screen, font):
-    username = ''
-    input_box = pygame.Rect(250, 250, 140, 32)
-    color_inactive = pygame.Color('lightskyblue3')
-    color_active = pygame.Color('dodgerblue2')
-    color = color_inactive
-    active = False
-    running = True
-
-    while running:
-        screen.fill((0, 0, 0))
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-                return None  # Return None if user closes the window
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if input_box.collidepoint(event.pos):
-                    active = not active
-                else:
-                    active = False
-                color = color_active if active else color_inactive
-            if event.type == pygame.KEYDOWN:
-                if active:
-                    if event.key == pygame.K_RETURN:
-                        return username  # Return the username if the user presses enter
-                    elif event.key == pygame.K_BACKSPACE:
-                        username = username[:-1]
-                    else:
-                        username += event.unicode
-
-        txt_surface = font.render(username, True, color)
-        width = max(200, txt_surface.get_width() + 10)
-        input_box.w = width
-        screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
-        pygame.draw.rect(screen, color, input_box, 2)
-
-        pygame.display.flip()
-
-    pygame.quit()
-
