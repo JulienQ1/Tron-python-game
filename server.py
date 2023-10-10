@@ -13,8 +13,12 @@ def handle_client(client_socket):
             data = client_socket.recv(1024)
             if not data:
                 break
-
-            broadcast(data, client_socket)
+            if data == b'quit':
+                print(f"Client {client_socket.getpeername()} a quitté le jeu.")
+                clients.remove(client_socket)
+                client_socket.close()
+            else : 
+                broadcast(data, client_socket)
 
         except Exception as e:
             print(f"Erreur: {str(e)}")
