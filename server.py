@@ -31,10 +31,11 @@ def broadcast(message, client_socket):
             except Exception as e:
                 print(f"Erreur lors de la diffusion: {str(e)}")
 
-
+print("Le serveur est prêt à écouter les connexions...")
 while True:
     client_socket, addr = server.accept()
     clients.append(client_socket)
+    print(f"Client {addr} connecté au serveur.")
 
     client_handler = threading.Thread(target=handle_client, args=(client_socket,))
     client_handler.start()
