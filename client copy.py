@@ -114,6 +114,43 @@ def login(user_nam,connection):#a function to get username and compare with the 
     else:
         print("Unexpected server response")
         return "error"
+    
+def get_player_code(connection):
+    """
+    Get the player code (A, B, C, or D) from the server.
+
+    """
+    try:
+        # Receive player code from server
+        player_code = connection.recv(1024).decode('utf-8')
+
+        # Check if the player code is valid
+        if player_code in ['A', 'B', 'C', 'D']:
+            return player_code
+        else:
+            print(f"Unexpected player code received: {player_code}")
+            return None
+    except Exception as e:
+        print(f"Error while receiving player code: {e}")
+        return None
+
+
+# 定义一个函数来绘制待机界面
+def draw_waiting_screen(player_code):
+    screen.fill((0, 0, 0))  # 用黑色填充屏幕
+
+    # 在左下角显示玩家代号
+    font_small = pygame.font.Font(None, 32)
+    player_text = font_small.render(f"Player: {player_code}", True, (255, 255, 255))
+    screen.blit(player_text, (10, 560))  # 稍微离左边界和底部10像素
+
+    # 在画面正中显示“Waiting for other user”
+    font_large = pygame.font.Font(None, 48)
+    waiting_text = font_large.render("Waiting for other user", True, (255, 255, 255))
+    text_rect = waiting_text.get_rect(center=(400, 300))  # 居中定位
+    screen.blit(waiting_text, text_rect)
+
+    pygame.display.flip()  # 更新显示内容
 
 
 
@@ -157,16 +194,26 @@ while True:
 
 #wait for the game to start
 
+player_code = get_player_code(client_socket)
+if not player_code:
+    player_code = "Unknown"
+
 
 while True:
-    # Getting data from server
+    # 监听事件
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+            break
+
+    # 从服务器获取数据
     data = client_socket.recv(1024).decode('utf-8')
-    
+
     if data == START:
         print("Game will start")
         break
     else:
-        print("wait for other users")
+        draw_waiting_screen(player_code)
         time.sleep(1)
 
 

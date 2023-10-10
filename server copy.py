@@ -1,5 +1,4 @@
 import socket
-import random
 
 # Server constants
 SERVER_IP = "127.0.0.1"
@@ -7,7 +6,6 @@ SERVER_PORT = 6859
 ALLOWED_USERNAMES = ["1234", "5678", "9012", "3456"]
 LOGIN_SUC = "login_success"
 LOGIN_FAIL = "login_fail"
-PLAYER_CODES = ["A", "B", "C", "D"]
 
 # Create a socket object
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -18,8 +16,6 @@ server_socket.bind((SERVER_IP, SERVER_PORT))
 # Listen for incoming connections
 server_socket.listen(5) # 5 is the maximum number of queued connections
 print(f"Server started on {SERVER_IP}:{SERVER_PORT}, waiting for connections...")
-
-allocated_codes = set()  # Keep track of allocated player codes
 
 while True:
     # Accept a new connection
@@ -32,15 +28,6 @@ while True:
     # Check if the username is in the allowed list
     if data in ALLOWED_USERNAMES:
         client_socket.sendall(LOGIN_SUC.encode('utf-8'))
-
-        # Assign a player code that hasn't been allocated yet
-        available_codes = list(set(PLAYER_CODES) - allocated_codes)
-        if available_codes:
-            assigned_code = random.choice(available_codes)
-            allocated_codes.add(assigned_code)
-            client_socket.sendall(assigned_code.encode('utf-8'))
-        else:
-            client_socket.sendall("ERROR: No available player codes".encode('utf-8'))
     else:
         client_socket.sendall(LOGIN_FAIL.encode('utf-8'))
 
