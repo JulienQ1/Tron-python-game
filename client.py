@@ -65,7 +65,7 @@ while True:
     target_dureation = 1/FPS
     if passed_time < target_dureation:
         time.sleep(target_dureation-passed_time)
-    break
+        
 
 
 def login(user_nam,connection):#a function to get username and compare with the server
