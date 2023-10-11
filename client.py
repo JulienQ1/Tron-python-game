@@ -77,17 +77,17 @@ player_images_little = {
 
 def login_screen(screen, font):
     username = ''
-    screen_width, screen_height = screen.get_size()  # 获取屏幕尺寸
+    screen_width, screen_height = screen.get_size()  # get the size of screen
 
-    # 渲染 "Please enter the user name:" 文本
+    # draw "Please enter the user name:" text
     prompt_text_surface = font.render('Please enter the user name:', True, (255, 255, 255))
-    prompt_text_width, prompt_text_height = prompt_text_surface.get_size()  # 获取文本尺寸
+    prompt_text_width, prompt_text_height = prompt_text_surface.get_size()  # get size of text
 
-    # 计算文本和输入框的位置以居中它们
+    # calculate the position of text to make them middle
     prompt_text_position_x = (screen_width - prompt_text_width) / 2
     prompt_text_position_y = (screen_height / 2) - prompt_text_height - 10
 
-    input_box_width = 200  # 可以根据您的需求进行调整
+    input_box_width = 200  # could be changed
     input_box_height = 32
     input_box_x = (screen_width - input_box_width) / 2
     input_box_y = screen_height / 2
@@ -102,7 +102,7 @@ def login_screen(screen, font):
     while running:
         screen.fill((0, 0, 0))
 
-        # 绘制文本和输入框
+        # draw text and input area
         screen.blit(prompt_text_surface, (prompt_text_position_x, prompt_text_position_y))
 
         for event in pygame.event.get():
@@ -176,29 +176,29 @@ def get_player_code(connection):
         return None
 
 
-# 定义一个函数来绘制待机界面
+# define a function to draw the waiting screen
 def draw_waiting_screen(player_code):
-    screen.fill((0, 0, 0))  # 用黑色填充屏幕
+    screen.fill((0, 0, 0))  # fill the screen with black
 
-    # 在左下角显示玩家代号
+    # display the user code on left down
     font_small = pygame.font.Font(None, 32)
     player_text = font_small.render(f"Player: {player_code}", True, (255, 255, 255))
-    screen.blit(player_text, (10, 560))  # 稍微离左边界和底部10像素
+    screen.blit(player_text, (10, 560))  # away from left and botton to 10 pixel
 
-    # 在画面正中显示“Waiting for other user”
+    # print “Waiting for other user” in middle
     font_large = pygame.font.Font(None, 48)
     waiting_text = font_large.render("Waiting for other user", True, (255, 255, 255))
-    text_rect = waiting_text.get_rect(center=(400, 300))  # 居中定位
+    text_rect = waiting_text.get_rect(center=(400, 300))  # locat in center
     screen.blit(waiting_text, text_rect)
 
-    # 在右下角显示玩家图片
+    # draw user image in right down side
     if player_code in player_images:
 
         player_img = player_images[player_code]
 
-        screen.blit(player_img, (720, 560))  # 从右边界和底部边界10像素的位置开始
+        screen.blit(player_img, (720, 560))  # start from 10px right and botton
 
-    pygame.display.flip()  # 更新显示内容
+    pygame.display.flip()  # renew the screen
 
 #define a function to get the userinput, and send to server
 def send_movement_to_server(direction, connection):
@@ -267,13 +267,13 @@ if not player_code:
 
 
 while True:
-    # 监听事件
+    # listening the event
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
             break
 
-    # 从服务器获取数据
+    # get data from server
     data = client_socket.recv(1024).decode('utf-8')
 
     if data == START:
@@ -286,28 +286,28 @@ while True:
 
 #main loop below
 
-# 在屏幕中间显示灰色矩形
+# print a gray platform in the middle of screen
 center_x = (screen.get_width() - 600) // 2
 center_y = (screen.get_height() - 600) // 2
 pygame.draw.rect(screen, (128, 128, 128), (center_x, center_y, 600, 600))
 
 # make a new Surface to draw the trace
 trail_surface = pygame.Surface(screen.get_size())
-trail_surface.set_colorkey((0, 0, 0))  # 设置颜色键，以使其透明
+trail_surface.set_colorkey((0, 0, 0))  # set the clolr to transparrent
 trail_surface.fill((0, 0, 0))
 
 # main loop
 
 while True:
     start_time = time.time()
-    screen.fill((0, 0, 0))  # 清除屏幕内容
+    screen.fill((0, 0, 0))  # clean the screen
 
-    # 在屏幕中间显示灰色矩形
+    # show grey in middle
     center_x = (screen.get_width() - 600) // 2
     center_y = (screen.get_height() - 600) // 2
     pygame.draw.rect(screen, (128, 128, 128), (center_x, center_y, 600, 600))
 
-    # 在trail_surface上更新轨迹
+    # renew the trace on trail_surface
     player_positions = get_player_positions_from_server(client_socket)
     if player_positions:
         for player_code_drawing, (x, y) in player_positions.items():
@@ -317,10 +317,10 @@ while True:
                 pygame.draw.line(trail_surface, player_colors[player_code_drawing], (prev_x + 20, prev_y + 10), (x + 20, y + 10), 2)
             previous_positions[player_code_drawing] = (x, y)  # update the previous position
 
-    # 画trail_surface到主屏幕上
+    # draw trail_surface to main screen
     screen.blit(trail_surface, (0, 0))
 
-    # 在主屏幕上绘制玩家的角色图片（只绘制当前的位置，不会绘制轨迹）
+    # draw user's image on main screen, (only position, not trace)
     for player_code_drawing, (x, y) in player_positions.items():
         if player_code_drawing in player_images_little:
 
@@ -328,13 +328,13 @@ while True:
 
             screen.blit(player_img, (x, y))
     
-    # 在左下角显示玩家的代码
+    # show user code left down
     font = pygame.font.SysFont(None, 36)
     if player_code in player_positions.keys():
         label = font.render(username, True, (255, 255, 255))
         screen.blit(label, (10, screen.get_height() - label.get_height() - 10))
     
-    # 在右下角显示玩家代码对应的图片
+    # show user image right down
     if player_code in player_positions.keys():
         if player_code in player_images:
             
@@ -342,11 +342,11 @@ while True:
 
             screen.blit(player_img, (screen.get_width() - 110, screen.get_height() - 60))
 
-    pygame.display.flip()  # 更新显示内容
+    pygame.display.flip()  # renew the print
 
     # Rest of the main loop ...
 
-    # 保证循环固定FPS运行
+    # keep loop run in FPS
     passed_time = time.time() - start_time
     target_duration = 1/FPS
     if passed_time < target_duration:
