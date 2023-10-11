@@ -157,21 +157,22 @@ def get_player_code(connection):
 
     """
     # Receive player code from server
-    player_code = connection.recv(1024).decode('utf-8')
-    while True:
-        if player_code == "Awaiting":
-            print("Waiting for server to assign player code.")
-            player_code = connection.recv(1024).decode('utf-8')
+    try:
+        # Receive player code from server
+        client_socket.sendall("need_user_code".encode('utf-8'))
+        player_code = connection.recv(1024).decode('utf-8')
+
+        print(player_code)
+
+        # Check if the player code is valid
+        if player_code in ['A', 'B', 'C', 'D']:
+            client_socket.sendall("get_user_code".encode('utf-8'))
+            return player_code
         else:
-            break
-
-    print(player_code)
-
-    # Check if the player code is valid
-    if player_code in ['A', 'B', 'C', 'D']:
-        return player_code
-    else:
-        print(f"Unexpected player code received: {player_code}")
+            print(f"Unexpected player code received: {player_code}")
+            return None
+    except Exception as e:
+        print(f"Error while receiving player code: {e}")
         return None
 
 

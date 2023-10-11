@@ -36,31 +36,35 @@ while True:
         client_socket.sendall(LOGIN_SUC.encode('utf-8'))
 
         # Assign a player code that hasn't been allocated yet
-        available_codes = list(set(PLAYER_CODES) - allocated_codes)
-        if available_codes:
-            assigned_code = random.choice(available_codes)
-            allocated_codes.add(assigned_code)
-            client_socket.sendall(assigned_code.encode('utf-8'))
-            i = 0
-            while (i <10):
-                client_socket.sendall("waiting".encode('utf-8'))
-                time.sleep(1)
-                i = i+1
+        data = client_socket.recv(1024).decode('utf-8')
+        if data == "need_user_code":
+            available_codes = list(set(PLAYER_CODES) - allocated_codes)
+            if available_codes:
+                assigned_code = random.choice(available_codes)
+                allocated_codes.add(assigned_code)
+                client_socket.sendall(assigned_code.encode('utf-8'))
+                data = client_socket.recv(1024).decode('utf-8')
+                if data == "get_user_code":
+                    i = 0
+                    while (i <10):
+                        client_socket.sendall("waiting".encode('utf-8'))
+                        time.sleep(1)
+                        i = i+1
 
-            # Send game start signal
-            client_socket.sendall(GAME_START.encode('utf-8'))
+                    # Send game start signal
+                    client_socket.sendall(GAME_START.encode('utf-8'))
 
-            # Send random player positions for testing
-            while True:
-                time.sleep(1)  # Wait a second before sending the next positions
-                positions = ','.join([f"{code}:{random.randint(100, 700)}-{random.randint(0, 600)}"
-                                    for code in PLAYER_CODES])
-                client_socket.sendall(positions.encode('utf-8'))
+                    # Send random player positions for testing
+                    while True:
+                        time.sleep(1)  # Wait a second before sending the next positions
+                        positions = ','.join([f"{code}:{random.randint(100, 700)}-{random.randint(0, 600)}"
+                                            for code in PLAYER_CODES])
+                        client_socket.sendall(positions.encode('utf-8'))
 
 
-        else:
-            client_socket.sendall("ERROR: No available player codes".encode('utf-8'))
-            client_socket.close()
+            else:
+                client_socket.sendall("ERROR: No available player codes".encode('utf-8'))
+                client_socket.close()
 
     else:
         client_socket.sendall(LOGIN_FAIL.encode('utf-8'))
