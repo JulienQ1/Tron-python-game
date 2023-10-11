@@ -211,11 +211,6 @@ def send_movement_to_server(direction, connection):
 def get_player_positions_from_server(connection):
     try:
         data = connection.recv(1024).decode('utf-8')
-        
-        # Check if the received data is a loss message
-        if ",loss" in data:
-            return data
-        
         player_positions = {}
         players_data = data.split(',')
         for player_data in players_data:
@@ -323,7 +318,6 @@ trail_surface.fill((0, 0, 0))
 
 loss_notification = None  # Store any loss notification for other players
 player_lost = False  # Flag to track if the current player lost
-data_end = ""
 
 # main loop
 
@@ -337,12 +331,7 @@ while True:
     pygame.draw.rect(screen, (128, 128, 128), (center_x, center_y, 600, 600))
 
     # renew the trace on trail_surface
-    #player_positions = get_player_positions_from_server(client_socket)
-    getted_data = get_player_positions_from_server(client_socket)
-    if ",loss" in getted_data:
-        data_end = getted_data
-    else:
-        player_positions = getted_data
+    player_positions = get_player_positions_from_server(client_socket)
     if player_positions:
         for player_code_drawing, (x, y) in player_positions.items():
             # Draw a line between the previous position and current position
@@ -375,35 +364,9 @@ while True:
             player_img = player_images[player_code]
 
             screen.blit(player_img, (screen.get_width() - 110, screen.get_height() - 60))
-    # 2. Handle "loss" message from server
-    if ",loss" in data_end:
-        loser_code = data_end.split(",")[0]
-        if loser_code == player_code:
-            player_lost = True
-        else:
-            loss_notification = f"{loser_code} lost"
-
-    # 3. Display the appropriate message or box based on the above
-
-    # For other players' loss notification
-    if loss_notification:
-        font = pygame.font.SysFont(None, 36)
-        label = font.render(loss_notification, True, (255, 0, 0))
-        screen.blit(label, (screen.get_width() - label.get_width() - 10, 10))
-
-    # For current player's loss
-    if player_lost:
-        # Draw a rectangle in the center
-        rect_width = 300
-        rect_height = 100
-        pygame.draw.rect(screen, (0, 0, 128), (screen.get_width() // 2 - rect_width // 2, screen.get_height() // 2 - rect_height // 2, rect_width, rect_height))
-        
-        font = pygame.font.SysFont(None, 36)
-        label = font.render("You LOST", True, (255, 255, 255))
-        screen.blit(label, (screen.get_width() // 2 - label.get_width() // 2, screen.get_height() // 2 - label.get_height() // 2))
 
     pygame.display.flip()  # renew the print
-
+    
 
     send_player_action_to_server(client_socket, player_code)
 

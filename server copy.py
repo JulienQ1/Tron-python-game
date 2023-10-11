@@ -5,7 +5,7 @@ import time
 # Server constants
 SERVER_IP = "127.0.0.1"
 SERVER_PORT = 6859
-ALLOWED_USERNAMES = ["1234", "5678", "9012", "3456"]
+ALLOWED_USERNAMES = ["1111", "2222", "3333", "4444"]
 LOGIN_SUC = "login_success"
 LOGIN_FAIL = "login_fail"
 PLAYER_CODES = ["A", "B", "C", "D"]
@@ -18,48 +18,66 @@ server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.bind((SERVER_IP, SERVER_PORT))
 
 # Listen for incoming connections
-server_socket.listen(5)  # 5 is the maximum number of queued connections
+server_socket.listen(5)
 print(f"Server started on {SERVER_IP}:{SERVER_PORT}, waiting for connections...")
 
-allocated_codes = set()  # Keep track of allocated player codes
+allocated_codes = set()
+
+#Build and initialized the grid
+GRID_SIZE = 10
+
+player_positions = {code: (random.randint(800, 1000), random.randint(700, 900)) for code in PLAYER_CODES}  # Initialize off-screen
 
 while True:
     # Accept a new connection
     client_socket, client_address = server_socket.accept()
     print(f"Connection from {client_address}")
 
-    # Receive the username from the client
     data = client_socket.recv(1024).decode('utf-8')
-
-    # Check if the username is in the allowed list
     if data in ALLOWED_USERNAMES:
         client_socket.sendall(LOGIN_SUC.encode('utf-8'))
+        data = client_socket.recv(1024).decode('utf-8')
+        if data == "need_user_code":
+            available_codes = list(set(PLAYER_CODES) - allocated_codes)
+            if available_codes:
+                assigned_code = random.choice(available_codes)
+                allocated_codes.add(assigned_code)
+                client_socket.sendall(assigned_code.encode('utf-8'))
+                data = client_socket.recv(1024).decode('utf-8')
+                if data == "get_user_code":
+                    i = 0
+                    while i < 2:
+                        client_socket.sendall("waiting".encode('utf-8'))
+                        time.sleep(1)
+                        i += 1
 
-        # Assign a player code that hasn't been allocated yet
-        available_codes = list(set(PLAYER_CODES) - allocated_codes)
-        if available_codes:
-            assigned_code = random.choice(available_codes)
-            allocated_codes.add(assigned_code)
-            client_socket.sendall(assigned_code.encode('utf-8'))
+                    # Give assigned players a random starting position
+                    player_positions[assigned_code] = (random.randint(100, 700), random.randint(0, 600))
+                    client_socket.sendall(GAME_START.encode('utf-8'))
 
-            # Wait for 2 seconds
-            time.sleep(2)
+                    while True:
+                        client_socket.settimeout(0.01)
+                        try:
+                            move_command = client_socket.recv(1024).decode('utf-8').split(',')
+                            player_code, direction = move_command[0], move_command[1]
+                            x, y = player_positions[player_code]
+                            if direction == "up":
+                                y -= 10
+                            elif direction == "down":
+                                y += 10
+                            elif direction == "left":
+                                x -= 10
+                            elif direction == "right":
+                                x += 10
+                            player_positions[player_code] = (x, y)
+                        except socket.timeout:
+                            print("No data received after 0.5 seconds, moving on...")
 
-            # Send game start signal
-            client_socket.sendall(GAME_START.encode('utf-8'))
-
-            # Send random player positions for testing
-            while True:
-                time.sleep(1)  # Wait a second before sending the next positions
-                positions = ','.join([f"{code}:{random.randint(100, 700)}-{random.randint(0, 600)}"
-                                    for code in PLAYER_CODES])
-                client_socket.sendall(positions.encode('utf-8'))
-
-
-        else:
-            client_socket.sendall("ERROR: No available player codes".encode('utf-8'))
-            client_socket.close()
-
+                        positions = ','.join([f"{code}:{x}-{y}" for code, (x, y) in player_positions.items()])
+                        client_socket.sendall(positions.encode('utf-8'))
+            else:
+                client_socket.sendall("ERROR: No available player codes".encode('utf-8'))
+                client_socket.close()
     else:
         client_socket.sendall(LOGIN_FAIL.encode('utf-8'))
         client_socket.close()

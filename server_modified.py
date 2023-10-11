@@ -22,7 +22,13 @@ server_socket.listen(5)
 print(f"Server started on {SERVER_IP}:{SERVER_PORT}, waiting for connections...")
 
 allocated_codes = set()
-player_positions = {code: (random.randint(800, 1000), random.randint(700, 900)) for code in PLAYER_CODES}  # Initialize off-screen
+
+GRID_SIZE = 10
+GAME_AREA_SIZE = 600
+GRID_COUNT = GAME_AREA_SIZE // GRID_SIZE
+# Initialize the game grid as unused
+game_grid = [["unused" for _ in range(GRID_COUNT)] for _ in range(GRID_COUNT)]
+player_positions = {code: (random.randint(10, 59)*GRID_SIZE, random.randint(0, 59)*GRID_SIZE) for code in PLAYER_CODES}  # Initialize on the grid
 
 while True:
     # Accept a new connection
@@ -42,30 +48,42 @@ while True:
                 data = client_socket.recv(1024).decode('utf-8')
                 if data == "get_user_code":
                     i = 0
-                    while i < 10:
+                    while i < 2:
                         client_socket.sendall("waiting".encode('utf-8'))
                         time.sleep(1)
                         i += 1
 
-                    # Give assigned players a random starting position
-                    player_positions[assigned_code] = (random.randint(100, 700), random.randint(0, 600))
+                    # Give assigned players a random starting position on the grid
+                    player_positions[assigned_code] = (random.randint(10, 59)*GRID_SIZE, random.randint(0, 59)*GRID_SIZE)
                     client_socket.sendall(GAME_START.encode('utf-8'))
 
                     while True:
-                        move_command = client_socket.recv(1024).decode('utf-8').split(',')
-                        player_code, direction = move_command[0], move_command[1]
-                        x, y = player_positions[player_code]
-                        if direction == "up":
-                            y -= 10
-                        elif direction == "down":
-                            y += 10
-                        elif direction == "left":
-                            x -= 10
-                        elif direction == "right":
-                            x += 10
-                        player_positions[player_code] = (x, y)
+                        client_socket.settimeout(0.5)
+                        try:
+                            move_command = client_socket.recv(1024).decode('utf-8').split(',')
+                            player_code, direction = move_command[0], move_command[1]
+                            x, y = player_positions[player_code]
+                            if direction == "up" and y > 100:
+                                y -= GRID_SIZE
+                            elif direction == "down" and y < 700-GRID_SIZE:
+                                y += GRID_SIZE
+                            elif direction == "left" and x > 100:
+                                x -= GRID_SIZE
+                            elif direction == "right" and x < 700-GRID_SIZE:
+                                x += GRID_SIZE
 
-                        time.sleep(1)
+                            # Check if the grid cell is used
+                            grid_x, grid_y = (x - 100) // GRID_SIZE, y // GRID_SIZE
+                            if game_grid[grid_y][grid_x] == "used":
+                                client_socket.sendall(f"{player_code},loss".encode('utf-8'))
+                                break  # Exit the loop, ending the game for this player
+
+                            game_grid[grid_y][grid_x] = "used"
+                            player_positions[player_code] = (x, y)
+
+                        except socket.timeout:
+                            print("No data received after 0.5 seconds, moving on...")
+
                         positions = ','.join([f"{code}:{x}-{y}" for code, (x, y) in player_positions.items()])
                         client_socket.sendall(positions.encode('utf-8'))
             else:
