@@ -310,32 +310,32 @@ while True:
     # 在trail_surface上更新轨迹
     player_positions = get_player_positions_from_server(client_socket)
     if player_positions:
-        for player_code, (x, y) in player_positions.items():
+        for player_code_drawing, (x, y) in player_positions.items():
             # Draw a line between the previous position and current position
-            if previous_positions[player_code]:
-                prev_x, prev_y = previous_positions[player_code]
-                pygame.draw.line(trail_surface, player_colors[player_code], (prev_x + 20, prev_y + 10), (x + 20, y + 10), 2)
-            previous_positions[player_code] = (x, y)  # update the previous position
+            if previous_positions[player_code_drawing]:
+                prev_x, prev_y = previous_positions[player_code_drawing]
+                pygame.draw.line(trail_surface, player_colors[player_code_drawing], (prev_x + 20, prev_y + 10), (x + 20, y + 10), 2)
+            previous_positions[player_code_drawing] = (x, y)  # update the previous position
 
     # 画trail_surface到主屏幕上
     screen.blit(trail_surface, (0, 0))
 
     # 在主屏幕上绘制玩家的角色图片（只绘制当前的位置，不会绘制轨迹）
-    for player_code, (x, y) in player_positions.items():
-        if player_code in player_images_little:
+    for player_code_drawing, (x, y) in player_positions.items():
+        if player_code_drawing in player_images_little:
 
-            player_img = player_images_little[player_code]
+            player_img = player_images_little[player_code_drawing]
 
             screen.blit(player_img, (x, y))
     
     # 在左下角显示玩家的代码
     font = pygame.font.SysFont(None, 36)
-    for player_code in player_positions.keys():
+    if player_code in player_positions.keys():
         label = font.render(username, True, (255, 255, 255))
         screen.blit(label, (10, screen.get_height() - label.get_height() - 10))
     
     # 在右下角显示玩家代码对应的图片
-    for player_code in player_positions.keys():
+    if player_code in player_positions.keys():
         if player_code in player_images:
             
             player_img = player_images[player_code]
