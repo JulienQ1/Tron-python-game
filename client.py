@@ -2,13 +2,13 @@ import pygame
 import socket
 import time #to count and control the time of a loop
 
-SERVER_IP = "172.21.72.240" #The IP of the server
+SERVER_IP = "127.0.0.1" #The IP of the server
 SERVER_PORT = 6859 #The port used of server
 CLIENT_IP = "127.0.0.1" #The IP of client
 CLIENT_PORT = 6859 #The port used by client
 LOGIN_SUC = "login_success" #The message given by server that means username is right
 LOGIN_FAIL = "login_fail"
-FPS = 1 #how many loops every second
+FPS = 60 #how many loops every second
 USER_NUMBER = 4
 START = "game_start" #start signal provide by server
 STOP = "game_stop"#stop signal provide by server
@@ -223,6 +223,26 @@ def get_player_positions_from_server(connection):
         return None
 
 
+#send user's action to server
+def send_player_action_to_server(client_socket, player_code):
+    for event in pygame.event.get():
+        direction = None
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                direction = "up"
+            elif event.key == pygame.K_DOWN:
+                direction = "down"
+            elif event.key == pygame.K_LEFT:
+                direction = "left"
+            elif event.key == pygame.K_RIGHT:
+                direction = "right"
+            
+        if direction:
+            message = f"{player_code},{direction}"
+            client_socket.send(message.encode('utf-8'))
+
+
+
 
 #login procedure
 print("Welcom to our game")
@@ -344,7 +364,7 @@ while True:
 
     pygame.display.flip()  # renew the print
 
-    # Rest of the main loop ...
+    send_player_action_to_server(client_socket, player_code)
 
     # keep loop run in FPS
     passed_time = time.time() - start_time

@@ -28,7 +28,6 @@ while True:
     client_socket, client_address = server_socket.accept()
     print(f"Connection from {client_address}")
 
-
     # Receive the username from the client
     data = client_socket.recv(1024).decode('utf-8')
 
@@ -61,14 +60,7 @@ while True:
                         positions = ','.join([f"{code}:{random.randint(100, 700)}-{random.randint(0, 600)}"
                                             for code in PLAYER_CODES])
                         client_socket.sendall(positions.encode('utf-8'))
-
-                        client_socket.settimeout(0.5)
-                        try:
-                            data = client_socket.recv(1024).decode('utf-8')
-                            print(f"Received from client: {data}")  # print any cecived data
-                            # 处理接收到的数据
-                        except socket.timeout:
-                            print("No data received after 0.5 seconds, moving on...")
+                    
 
 
             else:
