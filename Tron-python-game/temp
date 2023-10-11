@@ -1,0 +1,30 @@
+
+
+# main loop
+while True:
+    screen.fill((0, 0, 0))
+
+    # Handle pygame events
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            client_socket.close()
+            exit()
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                send_movement_to_server("UP", client_socket)
+            elif event.key == pygame.K_DOWN:
+                send_movement_to_server("DOWN", client_socket)
+            elif event.key == pygame.K_LEFT:
+                send_movement_to_server("LEFT", client_socket)
+            elif event.key == pygame.K_RIGHT:
+                send_movement_to_server("RIGHT", client_socket)
+
+    player_positions = get_player_positions_from_server(client_socket)
+    if player_positions:
+        for player_code, (x, y) in player_positions.items():
+            if player_code in player_images:
+                player_img = pygame.transform.scale(player_images[player_code], (40, 20))
+                screen.blit(player_img, (x, y))
+    
+    pygame.display.flip()
