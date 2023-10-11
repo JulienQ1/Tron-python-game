@@ -339,6 +339,7 @@ while True:
     # renew the trace on trail_surface
     #player_positions = get_player_positions_from_server(client_socket)
     getted_data = get_player_positions_from_server(client_socket)
+    print(getted_data)
     if ",loss" in getted_data:
         data_end = getted_data
     else:

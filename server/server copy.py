@@ -52,7 +52,7 @@ while True:
                 data = client_socket.recv(1024).decode('utf-8')
                 if data == "get_user_code":
                     i = 0
-                    while i < 2:
+                    while i < 1:
                         client_socket.sendall("waiting".encode('utf-8'))
                         time.sleep(1)
                         i += 1
@@ -70,11 +70,11 @@ while True:
                             x, y = player_positions[player_code]
                             if direction == "up" and y > 0:
                                 y -= GRID_SIZE
-                            elif direction == "down" and y < 700:
+                            elif direction == "down" and y < 580:
                                 y += GRID_SIZE
-                            elif direction == "left" and x > 100:
+                            elif direction == "left" and x > 90:
                                 x -= GRID_SIZE
-                            elif direction == "right" and x < 600:
+                            elif direction == "right" and x < 670:
                                 x += GRID_SIZE
 
                             # Check if the grid cell is used
@@ -87,7 +87,7 @@ while True:
                             player_positions[player_code] = (x, y)
 
                         except socket.timeout:
-                            print("No data received after 0.5 seconds, moving on...")
+                            print("No data received after 0.01 seconds, moving on...")
 
                         positions = ','.join([f"{code}:{x}-{y}" for code, (x, y) in player_positions.items()])
                         client_socket.sendall(positions.encode('utf-8'))

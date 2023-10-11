@@ -10,6 +10,7 @@ LOGIN_SUC = "login_success"
 LOGIN_FAIL = "login_fail"
 PLAYER_CODES = ["A", "B", "C", "D"]
 GAME_START = "game_start"
+SPEED = 1
 
 # Create a socket object
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -24,12 +25,18 @@ print(f"Server started on {SERVER_IP}:{SERVER_PORT}, waiting for connections..."
 allocated_codes = set()
 
 #Build and initialized the grid
-GRID_SIZE = 10
+GRID_SIZE = 1
 GAME_AREA_SIZE = 600
 GRID_COUNT = GAME_AREA_SIZE // GRID_SIZE
 # Initialize the game grid as unused
 game_grid = [["unused" for _ in range(GRID_COUNT)] for _ in range(GRID_COUNT)]
-player_positions = {code: (800 + random.randint(1, 10)*GRID_SIZE, random.randint(0, 59)*GRID_SIZE) for code in PLAYER_CODES}
+#player_positions = {code: (800 + random.randint(1, 10)*GRID_SIZE, random.randint(0, 59)*GRID_SIZE) for code in PLAYER_CODES}
+player_positions = {code: (0, 0) for code in PLAYER_CODES}
+old_place = {code: (0, 0) for code in PLAYER_CODES}
+new_place = {code: (0, 0) for code in PLAYER_CODES}
+delta_place = {code: (0, 0) for code in PLAYER_CODES}
+delta_x = 0
+delta_y = 0
   # Initialize on the grid
   # Initialize off-screen
 
@@ -51,29 +58,30 @@ while True:
                 data = client_socket.recv(1024).decode('utf-8')
                 if data == "get_user_code":
                     i = 0
-                    while i < 2:
+                    while i < 1:
                         client_socket.sendall("waiting".encode('utf-8'))
                         time.sleep(1)
                         i += 1
 
                     # Give assigned players a random starting position
-                    player_positions[assigned_code] = (random.randint(10, 59)*GRID_SIZE, random.randint(0, 59)*GRID_SIZE)
+                    player_positions[assigned_code] = (random.randint(100, 590)*GRID_SIZE, random.randint(0, 590)*GRID_SIZE)
 
                     client_socket.sendall(GAME_START.encode('utf-8'))
 
                     while True:
-                        client_socket.settimeout(0.01)
+                        client_socket.settimeout(0.1)
                         try:
                             move_command = client_socket.recv(1024).decode('utf-8').split(',')
                             player_code, direction = move_command[0], move_command[1]
                             x, y = player_positions[player_code]
-                            if direction == "up" and y > 100:
+                            old_place[player_code] = player_positions[player_code]
+                            if direction == "up" and y > 0:
                                 y -= GRID_SIZE
-                            elif direction == "down" and y < 700-GRID_SIZE:
+                            elif direction == "down" and y < 580:
                                 y += GRID_SIZE
-                            elif direction == "left" and x > 100:
+                            elif direction == "left" and x > 90:
                                 x -= GRID_SIZE
-                            elif direction == "right" and x < 700-GRID_SIZE:
+                            elif direction == "right" and x < 670:
                                 x += GRID_SIZE
 
                             # Check if the grid cell is used
@@ -83,10 +91,19 @@ while True:
                                 #break  # Exit the loop, ending the game for this player
 
                             game_grid[grid_y][grid_x] = "used"
+                            new_place[player_code] = (x,y)
                             player_positions[player_code] = (x, y)
-
+                            delta_x = new_place[player_code][0] - old_place[player_code][0]
+                            delta_y = new_place[player_code][1] - old_place[player_code][1]
+                            delta_place[player_code] = (delta_x, delta_y)
                         except socket.timeout:
-                            print("No data received after 0.5 seconds, moving on...")
+                            print("No data received after 0.1 seconds, moving on...")
+                            for player_code in PLAYER_CODES:
+                                x0,y0 = player_positions[player_code]
+                                delta_x,delta_y = delta_place[player_code]
+                                x1 = x0 + delta_x*SPEED
+                                y1 = y0 + delta_y*SPEED
+                                player_positions[player_code] = (x1,y1)
 
                         positions = ','.join([f"{code}:{x}-{y}" for code, (x, y) in player_positions.items()])
                         client_socket.sendall(positions.encode('utf-8'))
