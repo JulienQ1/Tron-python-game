@@ -29,8 +29,7 @@ GAME_AREA_SIZE = 600
 GRID_COUNT = GAME_AREA_SIZE // GRID_SIZE
 # Initialize the game grid as unused
 game_grid = [["unused" for _ in range(GRID_COUNT)] for _ in range(GRID_COUNT)]
-#player_positions = {code: (800 + random.randint(1, 10)*GRID_SIZE, random.randint(0, 59)*GRID_SIZE) for code in PLAYER_CODES}
-player_positions = {code: (0, 0) for code in PLAYER_CODES}
+player_positions = {code: (800 + random.randint(1, 10)*GRID_SIZE, random.randint(0, 59)*GRID_SIZE) for code in PLAYER_CODES}
   # Initialize on the grid
   # Initialize off-screen
 
@@ -68,13 +67,13 @@ while True:
                             move_command = client_socket.recv(1024).decode('utf-8').split(',')
                             player_code, direction = move_command[0], move_command[1]
                             x, y = player_positions[player_code]
-                            if direction == "up" and y > 0:
+                            if direction == "up" and y > 100:
                                 y -= GRID_SIZE
-                            elif direction == "down" and y < 700:
+                            elif direction == "down" and y < 700-GRID_SIZE:
                                 y += GRID_SIZE
                             elif direction == "left" and x > 100:
                                 x -= GRID_SIZE
-                            elif direction == "right" and x < 600:
+                            elif direction == "right" and x < 700-GRID_SIZE:
                                 x += GRID_SIZE
 
                             # Check if the grid cell is used
