@@ -2,7 +2,7 @@ import pygame
 import socket
 import time #to count and control the time of a loop
 
-SERVER_IP = "127.0.0.1" #The IP of the server
+SERVER_IP = "172.21.72.240" #The IP of the server
 SERVER_PORT = 6859 #The port used of server
 CLIENT_IP = "127.0.0.1" #The IP of client
 CLIENT_PORT = 6859 #The port used by client
