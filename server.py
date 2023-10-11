@@ -41,9 +41,11 @@ while True:
             assigned_code = random.choice(available_codes)
             allocated_codes.add(assigned_code)
             client_socket.sendall(assigned_code.encode('utf-8'))
-
-            # Wait for 2 seconds
-            time.sleep(2)
+            i = 0
+            while (i <10):
+                client_socket.sendall("waiting".encode('utf-8'))
+                time.sleep(1)
+                i = i+1
 
             # Send game start signal
             client_socket.sendall(GAME_START.encode('utf-8'))
