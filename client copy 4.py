@@ -55,10 +55,16 @@ screen = pygame.display.set_mode((800, 600))
 
 #import some resources
 player_images = {
-    "A": pygame.image.load("MA.png").convert_alpha(),
-    "B": pygame.image.load("MB.png").convert_alpha(),
-    "C": pygame.image.load("MC.png").convert_alpha(),
-    "D": pygame.image.load("MD.png").convert_alpha()
+    "A": pygame.image.load("MAM.png").convert_alpha(),
+    "B": pygame.image.load("MBM.png").convert_alpha(),
+    "C": pygame.image.load("MCM.png").convert_alpha(),
+    "D": pygame.image.load("MDM.png").convert_alpha()
+}
+player_images_little = {
+    "A": pygame.image.load("MAL.png").convert_alpha(),
+    "B": pygame.image.load("MBL.png").convert_alpha(),
+    "C": pygame.image.load("MCL.png").convert_alpha(),
+    "D": pygame.image.load("MDL.png").convert_alpha()
 }
 
 
@@ -223,8 +229,6 @@ client_socket.connect(server_address)
 
 
 while True:
-
-      # Assuming this is your screen size
     font = pygame.font.Font(None, 36)  # Assuming this is your font
 
     username = login_screen(screen, font)
@@ -286,6 +290,11 @@ while True:
     start_time = time.time()
     screen.fill((0, 0, 0))  # 清除屏幕内容
 
+    # 在屏幕中间显示灰色矩形
+    center_x = (screen.get_width() - 600) // 2
+    center_y = (screen.get_height() - 600) // 2
+    pygame.draw.rect(screen, (128, 128, 128), (center_x, center_y, 600, 600))
+
     # 在trail_surface上更新轨迹
     player_positions = get_player_positions_from_server(client_socket)
     if player_positions:
@@ -298,8 +307,6 @@ while True:
 
     # 画trail_surface到主屏幕上
     screen.blit(trail_surface, (0, 0))
-
-    
 
     # 在主屏幕上绘制玩家的角色图片（只绘制当前的位置，不会绘制轨迹）
     for player_code, (x, y) in player_positions.items():
@@ -332,5 +339,6 @@ while True:
     data_end = client_socket.recv(1024).decode('utf-8')
     if data_end == STOP:
         break
+
 
 client_socket.close()

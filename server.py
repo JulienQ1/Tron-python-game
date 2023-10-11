@@ -51,9 +51,10 @@ while True:
             # Send random player positions for testing
             while True:
                 time.sleep(1)  # Wait a second before sending the next positions
-                positions = ','.join([f"{code}:{random.randint(0, 800)}-{random.randint(0, 600)}"
-                                      for code in PLAYER_CODES])
+                positions = ','.join([f"{code}:{random.randint(100, 700)}-{random.randint(0, 600)}"
+                                    for code in PLAYER_CODES])
                 client_socket.sendall(positions.encode('utf-8'))
+
 
         else:
             client_socket.sendall("ERROR: No available player codes".encode('utf-8'))

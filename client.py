@@ -12,6 +12,11 @@ FPS = 1 #how many loops every second
 USER_NUMBER = 4
 START = "game_start" #start signal provide by server
 STOP = "game_stop"#stop signal provide by server
+USER_NUMBER = 0 #Get usernumber from server
+USER_RAMIN = 0 #Get how many user ramin from server
+USER_KILLED = False #To check wether user is killed
+USER_KILLED_OTHER = False# To check wether other user is killed
+
 
 #dictation used to store previous posision of users
 previous_positions = {"A": None, "B": None, "C": None, "D": None}
@@ -55,10 +60,16 @@ screen = pygame.display.set_mode((800, 600))
 
 #import some resources
 player_images = {
-    "A": pygame.image.load("MA.png").convert_alpha(),
-    "B": pygame.image.load("MB.png").convert_alpha(),
-    "C": pygame.image.load("MC.png").convert_alpha(),
-    "D": pygame.image.load("MD.png").convert_alpha()
+    "A": pygame.image.load("MAM.png").convert_alpha(),
+    "B": pygame.image.load("MBM.png").convert_alpha(),
+    "C": pygame.image.load("MCM.png").convert_alpha(),
+    "D": pygame.image.load("MDM.png").convert_alpha()
+}
+player_images_little = {
+    "A": pygame.image.load("MAL.png").convert_alpha(),
+    "B": pygame.image.load("MBL.png").convert_alpha(),
+    "C": pygame.image.load("MCL.png").convert_alpha(),
+    "D": pygame.image.load("MDL.png").convert_alpha()
 }
 
 
@@ -177,7 +188,9 @@ def draw_waiting_screen(player_code):
 
     # 在右下角显示玩家图片
     if player_code in player_images:
-        player_img = pygame.transform.scale(player_images[player_code], (80, 40))
+
+        player_img = player_images[player_code]
+
         screen.blit(player_img, (720, 560))  # 从右边界和底部边界10像素的位置开始
 
     pygame.display.flip()  # 更新显示内容
@@ -223,8 +236,6 @@ client_socket.connect(server_address)
 
 
 while True:
-
-      # Assuming this is your screen size
     font = pygame.font.Font(None, 36)  # Assuming this is your font
 
     username = login_screen(screen, font)
@@ -306,20 +317,24 @@ while True:
 
     # 在主屏幕上绘制玩家的角色图片（只绘制当前的位置，不会绘制轨迹）
     for player_code, (x, y) in player_positions.items():
-        if player_code in player_images:
-            player_img = pygame.transform.scale(player_images[player_code], (40, 20))
+        if player_code in player_images_little:
+
+            player_img = player_images_little[player_code]
+
             screen.blit(player_img, (x, y))
     
     # 在左下角显示玩家的代码
     font = pygame.font.SysFont(None, 36)
     for player_code in player_positions.keys():
-        label = font.render(f"Player: {player_code}", True, (255, 255, 255))
+        label = font.render(username, True, (255, 255, 255))
         screen.blit(label, (10, screen.get_height() - label.get_height() - 10))
     
     # 在右下角显示玩家代码对应的图片
     for player_code in player_positions.keys():
         if player_code in player_images:
-            player_img = pygame.transform.scale(player_images[player_code], (100, 50))
+            
+            player_img = player_images[player_code]
+
             screen.blit(player_img, (screen.get_width() - 110, screen.get_height() - 60))
 
     pygame.display.flip()  # 更新显示内容
