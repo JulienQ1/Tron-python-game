@@ -10,7 +10,7 @@ LOGIN_SUC = "login_success"
 LOGIN_FAIL = "login_fail"
 PLAYER_CODES = ["A", "B", "C", "D"]
 GAME_START = "game_start"
-SPEED = 1
+SPEED = 3
 
 # Create a socket object
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -83,13 +83,6 @@ while True:
                                 x -= GRID_SIZE
                             elif direction == "right" and x < 670:
                                 x += GRID_SIZE
-
-                            # Check if the grid cell is used
-                            grid_x, grid_y = (x - 100) // GRID_SIZE, y // GRID_SIZE
-                            if game_grid[grid_y][grid_x] == "used":
-                                client_socket.sendall(f"{player_code},loss".encode('utf-8'))
-                                #break  # Exit the loop, ending the game for this player
-
                             game_grid[grid_y][grid_x] = "used"
                             new_place[player_code] = (x,y)
                             player_positions[player_code] = (x, y)
@@ -104,6 +97,11 @@ while True:
                                 x1 = x0 + delta_x*SPEED
                                 y1 = y0 + delta_y*SPEED
                                 player_positions[player_code] = (x1,y1)
+                            # Check if the grid cell is used
+                        grid_x, grid_y = (player_positions[player_code][0] - 100) // GRID_SIZE, player_positions[player_code][1] // GRID_SIZE
+                        if game_grid[grid_y][grid_x] == "used" or grid_x >= 670 or grid_x <= 90 or grid_y<= 0 or grid_y >= 580:
+                            client_socket.sendall(f"{player_code},loss".encode('utf-8'))
+                            #break  # Exit the loop, ending the game for this player
 
                         positions = ','.join([f"{code}:{x}-{y}" for code, (x, y) in player_positions.items()])
                         client_socket.sendall(positions.encode('utf-8'))
