@@ -12,9 +12,6 @@ screen_width, screen_height = 700, 650
 screen = pygame.display.set_mode((screen_width, screen_height))
 clock = pygame.time.Clock()
 
-PLAYER1_COLOR = (255, 0, 0)  # Rouge
-PLAYER2_COLOR = (0, 0, 255)  # Bleu
-
 # Couleurs
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -53,7 +50,6 @@ while startGame == False:
 
 
 
-player_color = PLAYER1_COLOR  
 
 # Position initiale du carré contrôlé par le client
 x, y = 200, 200
@@ -85,7 +81,7 @@ while running:
 
     # Dessiner le carré
     screen.fill((0, 0, 0))
-    pygame.draw.rect(screen, player_color, (x, y, square_size, square_size))
+    pygame.draw.rect(screen, WHITE, (x, y, square_size, square_size))
 
     # Envoyer la position du carré au serveur
     client.send(f"{x},{y}".encode())
