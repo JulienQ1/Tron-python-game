@@ -2,10 +2,8 @@ import pygame
 import socket
 import time #to count and control the time of a loop
 
-SERVER_IP = "127.0.0.1" #The IP of the server
-SERVER_PORT = 6859 #The port used of server
-CLIENT_IP = "127.0.0.1" #The IP of client
-CLIENT_PORT = 6859 #The port used by client
+SERVER_IP = input("Please enter a server address (127.0.0.1 for test in computer)")
+SERVER_PORT = int(input("Please enter a server port"))
 
 SINGAL_END = "/END"
 SINGAL_REQUEST ="SIG_RE"
@@ -34,31 +32,6 @@ player_colors = {
     "C": (0, 0, 255),  # Blue
     "D": (0, 255, 0)  # Green
 }
-
-#init pygame and give a window
-#pygame.init()
-#screen = pygame.display.set_mode((1024, 1024))
-
-#define the font of text
-#font = pygame.font.Font(None, 36)
-#text_surface = font.render('Please input your username:', True, (255, 255, 255))
-
-#init the input part
-#username = ''
-#input_box = pygame.Rect(250, 250, 140, 32)
-#color_inactive = pygame.Color('lightskyblue3')
-#color_active = pygame.Color('dodgerblue2')
-#color = color_inactive
-#active = False
-
-
-
-
-# make an object of socket,and connect
-#client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#server_address = (SERVER_IP, SERVER_PORT)
-#client_socket.connect(server_address)
-
 
 #init pygame and give a window
 pygame.init()
