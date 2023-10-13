@@ -6,6 +6,7 @@ SERVER_IP = "172.21.72.240" #The IP of the server
 SERVER_PORT = 6859 #The port used of server
 CLIENT_IP = "127.0.0.1" #The IP of client
 CLIENT_PORT = 6859 #The port used by client
+SINGAL_END = "/END"
 LOGIN_SUC = "login_success" #The message given by server that means username is right
 LOGIN_FAIL = "login_fail"
 FPS = 60 #how many loops every second
@@ -210,8 +211,8 @@ def send_movement_to_server(direction, connection):
 #define a function to get the position of 4 users from server
 def get_player_positions_from_server(connection):
     try:
-        data = connection.recv(1024).decode('utf-8')
-        
+        data = data = connection.recv(10240).decode('utf-8').split(SINGAL_END)[0]
+        print(data)
         # Check if the received data is a loss message
         if ",loss" in data:
             return data
@@ -339,7 +340,7 @@ while True:
     # renew the trace on trail_surface
     #player_positions = get_player_positions_from_server(client_socket)
     getted_data = get_player_positions_from_server(client_socket)
-    print(getted_data)
+    #print(getted_data)
     if ",loss" in getted_data:
         data_end = getted_data
     else:

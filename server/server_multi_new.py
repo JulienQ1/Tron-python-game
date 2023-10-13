@@ -6,7 +6,7 @@ from multiprocessing import Process, Manager, Lock
 #some print used to debug and test
 
 # Server constants
-SERVER_IP = "172.21.72.240"
+SERVER_IP = "172.21.72.229"
 SERVER_PORT = 6859
 ALLOWED_USERNAMES = ["1111", "2222", "3333", "4444"]
 LOGIN_SUC = "login_success"
@@ -14,6 +14,7 @@ LOGIN_FAIL = "login_fail"
 PLAYER_CODES = ["A", "B", "C", "D"]
 GAME_START = "game_start"
 SPEED = 1
+SINGAL_END = "/END"
 
 #Grid constants
 #Build and initialized the grid
@@ -162,7 +163,7 @@ def handle_client(client_socket, game_grid, player_positions,allocated_codes,loc
                         '''
                     positions = ','.join([f"{code}:{x}-{y}" for code, (x, y) in player_positions.items()])
                     client_socket.sendall(positions.encode('utf-8'))
-
+                    client_socket.sendall((positions + SINGAL_END).encode('utf-8'))
 
 if __name__ == "__main__":
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
