@@ -6,7 +6,7 @@ from multiprocessing import Process, Manager, Lock
 #some print used to debug and test
 
 # Server constants
-SERVER_IP = "172.21.72.229"
+SERVER_IP = "172.21.72.240"
 SERVER_PORT = 6859
 ALLOWED_USERNAMES = ["1111", "2222", "3333", "4444"]
 LOGIN_SUC = "login_success"
