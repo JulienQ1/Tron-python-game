@@ -6,7 +6,7 @@ from multiprocessing import Process, Manager, Lock
 #some print used to debug and test
 
 # Server constants
-SERVER_IP = "172.21.72.240"
+SERVER_IP = "127.0.0.1"
 SERVER_PORT = 6859
 ALLOWED_USERNAMES = ["1111", "2222", "3333", "4444"]
 LOGIN_SUC = "login_success"
@@ -39,7 +39,7 @@ def monitor_clients(allocated_codes,lock,shared_Char):
         if len(allocated_codes) >=2 :
             print("prepare!")
             break
-    i = 10
+    i = 5
     while i >0:
         print("will start at :",i)
         time.sleep(1)
@@ -84,8 +84,6 @@ def handle_client(client_socket, game_grid, player_positions,allocated_codes,loc
                 with lock:
                     player_positions[assigned_code] = (random.randint(100, 590)*GRID_SIZE, random.randint(0, 590)*GRID_SIZE)
                     client_socket.sendall(GAME_START.encode('utf-8'))
-                
-                #don't know wether should use lock, remove if needn't
                 while True:
                     client_socket.settimeout(0.01)
                     try:
@@ -95,8 +93,7 @@ def handle_client(client_socket, game_grid, player_positions,allocated_codes,loc
                         x, y = player_positions[player_code]
                         grid_current_x, grid_current_y = (x - 100) // GRID_SIZE, y // GRID_SIZE
                         with lock:
-                            old_place[player_code] = player_positions[player_code]
-
+                            old_place[player_code]=player_positions[player_code]
                         if direction == "up" and y > 0:
                             y -= GRID_SIZE
                         elif direction == "down" and y < 580:
@@ -111,67 +108,38 @@ def handle_client(client_socket, game_grid, player_positions,allocated_codes,loc
                             print([player_code],"loss at",[index])
                             client_socket.sendall(f"{player_code},loss".encode('utf-8'))
                         else:
-                            player_positions[player_code]=(x,y)
-                            print("before:  ",grid_current_x,"   ",grid_current_y,"   ",game_grid[grid_current_y][grid_current_x])
+                            with lock:
+                                player_positions[player_code]=(x,y)
                         with lock:
                             new_row = game_grid[grid_current_y][:]
                             new_row[grid_current_x] = "used"
                             game_grid[grid_current_y] = new_row
-                            print("afger:  ",grid_current_x,"   ",grid_current_y,"   ",game_grid[grid_current_y][grid_current_x])
-                        
+                            new_place[player_code]=player_positions[player_code]
                         #below code for check wether the grid point is used
-                        '''
-                        #game_grid[grid_y_current_manual][grid_y_current_manual] = "used"
-
-                        # Check if the grid cell is used
-                        
-                        if game_grid[grid_y][grid_x] == "used":
-                            client_socket.sendall(f"{player_code},loss".encode('utf-8'))
-                            #break  # Exit the loop, ending the game for this player
-
-                        game_grid[grid_y][grid_x] = "used"
-                        print("change direction at",game_grid[grid_y][grid_x])
-                        
-                        with lock:
-                            new_place[player_code] = (x,y)
-                            player_positions[player_code] = (x, y)
-                        delta_x = new_place[player_code][0] - old_place[player_code][0]
-                        delta_y = new_place[player_code][1] - old_place[player_code][1]
-                        with lock:
-                            delta_place[player_code] = (delta_x, delta_y)
-                        '''
                     except socket.timeout:
+                        x0, y0 = old_place[assigned_code]
+                        x1, y1 = new_place[assigned_code]
+                        grid_current_x, grid_current_y = (x0 - 100) // GRID_SIZE, y0 // GRID_SIZE
+                        delta_x = x1 - x0
+                        delta_y = y1 - y0
+                        if delta_x != 0 or delta_y != 0:
+                            
+                            x_move = x1 + delta_x * SPEED
+                            y_move = y1 + delta_y * SPEED
+                            grid_x_delta, grid_y_delta = (x_move - 100) // GRID_SIZE, y_move // GRID_SIZE
+
+
+                            if game_grid[grid_y_delta][grid_x_delta] == "used":
+                                client_socket.sendall(f"{player_code},loss".encode('utf-8'))
+                            else:
+                                with lock:
+                                    print(x_move," ",y_move,)
+                                    game_grid[grid_current_y][grid_current_x] = "used"
+                                    old_place[assigned_code] = new_place [assigned_code]
+                                    player_positions[assigned_code] = (x_move,y_move)
+                                    new_place[assigned_code] = (x_move,y_move)
                         #below code for auto move
-                        '''
-                        #print("No data received after 0.1 seconds, moving on...")
-                        for player_code in PLAYER_CODES:
 
-                            x0,y0 = player_positions[player_code]
-                            # Before processing the auto move, free up their current position
-                            #grid_x_current, grid_y_current = (x0 - 100) // GRID_SIZE, y0 // GRID_SIZE
-                            #game_grid[grid_y_current][grid_x_current] = "unused"
-
-                            delta_x,delta_y = delta_place[player_code]
-                            x1 = x0 + delta_x*SPEED
-                            y1 = y0 + delta_y*SPEED
-                            with lock:
-                                player_positions[player_code] = (x1,y1)
-
-                            # After moving the player, mark their new position as used
-                            #game_grid[grid_y_current][grid_x_current] = "used"
-
-                            #print(x1,x0,y1,y0)
-                            if (delta_x !=0 or delta_y != 0):
-                                #print('not startimg point colliding')
-                                grid_x_delta, grid_y_delta = (x1 - 100) // GRID_SIZE, y1 // GRID_SIZE
-                                if game_grid[grid_y_delta][grid_x_delta] == "used":
-                                    print('collided')
-                                    client_socket.sendall(f"{player_code},loss".encode('utf-8'))
-                                    print("loss send at",game_grid[grid_y_delta][grid_x_delta],(x1-100),y1)
-                                    #break  # Exit the loop, ending the game for this player
-                                else:
-                                    game_grid[grid_y_delta][grid_x_delta] = "used"
-                        '''
                     positions = ','.join([f"{code}:{x}-{y}" for code, (x, y) in player_positions.items()])
                     #client_socket.sendall(positions.encode('utf-8'))
                     client_socket.sendall((positions + SINGAL_END).encode('utf-8'))
