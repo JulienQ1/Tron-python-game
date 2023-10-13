@@ -1,0 +1,79 @@
+import pygame
+
+def login_screen(screen, font, bg_image_path="background.jpg", button_image_path="login_button.png"):
+    username = ''
+    screen_width, screen_height = screen.get_size()
+
+    # Load the background image
+    background = pygame.image.load(bg_image_path)
+    background = pygame.transform.scale(background, (screen_width, screen_height))
+
+    # Load the login button image
+    button = pygame.image.load(button_image_path)
+    button_width, button_height = button.get_size()
+
+    # Define button position
+    button_x = (screen_width - button_width) / 2
+    button_y = screen_height / 2 + 50  # 50 pixels below the input box
+
+    prompt_text_surface = font.render('Please enter the user name:', True, (255, 255, 255))
+    prompt_text_width, prompt_text_height = prompt_text_surface.get_size()
+    prompt_text_position_x = (screen_width - prompt_text_width) / 2
+    prompt_text_position_y = (screen_height / 2) - prompt_text_height - 10
+
+    input_box_width = 200
+    input_box_height = 32
+    input_box_x = (screen_width - input_box_width) / 2
+    input_box_y = screen_height / 2
+    input_box = pygame.Rect(input_box_x, input_box_y, input_box_width, input_box_height)
+
+    color_inactive = pygame.Color('lightskyblue3')
+    color_active = pygame.Color('dodgerblue2')
+    color = color_inactive
+    active = False
+    running = True
+
+    while running:
+        screen.fill((0, 0, 0))
+
+        # Draw the background image
+        screen.blit(background, (0, 0))
+        
+        screen.blit(prompt_text_surface, (prompt_text_position_x, prompt_text_position_y))
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                return None
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if input_box.collidepoint(event.pos):
+                    active = not active
+                else:
+                    active = False
+                color = color_active if active else color_inactive
+                
+                # Check for login button press
+                if button_x <= event.pos[0] <= button_x + button_width and button_y <= event.pos[1] <= button_y + button_height:
+                    return username
+
+            if event.type == pygame.KEYDOWN:
+                if active:
+                    if event.key == pygame.K_RETURN:
+                        return username
+                    elif event.key == pygame.K_BACKSPACE:
+                        username = username[:-1]
+                    else:
+                        username += event.unicode
+
+        txt_surface = font.render(username, True, color)
+        width = max(200, txt_surface.get_width() + 10)
+        input_box.w = width
+        screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
+        pygame.draw.rect(screen, color, input_box, 2)
+        
+        # Draw the button
+        screen.blit(button, (button_x, button_y))
+
+        pygame.display.flip()
+
+    pygame.quit()
