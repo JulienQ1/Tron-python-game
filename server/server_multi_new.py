@@ -90,7 +90,7 @@ def handle_client(client_socket, game_grid, player_positions,allocated_codes,loc
                     client_socket.settimeout(0.01)
                     try:
                         move_command = client_socket.recv(1024).decode('utf-8').split(',')
-                        print("move signal",move_command,"in thread",index)
+                        #print("move signal",move_command,"in thread",index)
                         player_code, direction = move_command[0], move_command[1]
                         x, y = player_positions[player_code]
                         grid_current_x, grid_current_y = (x - 100) // GRID_SIZE, y // GRID_SIZE
@@ -98,21 +98,26 @@ def handle_client(client_socket, game_grid, player_positions,allocated_codes,loc
                             old_place[player_code] = player_positions[player_code]
 
                         if direction == "up" and y > 0:
-                            y -= 100#GRID_SIZE
+                            y -= GRID_SIZE
                         elif direction == "down" and y < 580:
-                            y += 100#GRID_SIZE
+                            y += GRID_SIZE
                         elif direction == "left" and x > 90:
-                            x -= 100#GRID_SIZE
+                            x -= GRID_SIZE
                         elif direction == "right" and x < 670:
-                            x += 100#GRID_SIZE
-                        print(game_grid)
+                            x += GRID_SIZE
+                        #print(game_grid)
                         grid_x, grid_y = (x - 100) // GRID_SIZE, y // GRID_SIZE
                         if game_grid[grid_y][grid_x] == "used":
                             print([player_code],"loss at",[index])
                             client_socket.sendall(f"{player_code},loss".encode('utf-8'))
                         else:
                             player_positions[player_code]=(x,y)
-                            game_grid[grid_current_y][grid_current_x] = "used"
+                            print("before:  ",grid_current_x,"   ",grid_current_y,"   ",game_grid[grid_current_y][grid_current_x])
+                        with lock:
+                            new_row = game_grid[grid_current_y][:]
+                            new_row[grid_current_x] = "used"
+                            game_grid[grid_current_y] = new_row
+                            print("afger:  ",grid_current_x,"   ",grid_current_y,"   ",game_grid[grid_current_y][grid_current_x])
                         
                         #below code for check wether the grid point is used
                         '''
