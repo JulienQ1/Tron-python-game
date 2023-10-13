@@ -26,4 +26,7 @@ It's a snake-like game where you have to control a bike with a tail. You die, if
 Have fun
 
 
+### Video demo 
+
+https://www.loom.com/share/5579e10afe1a451ba5a2b86766866343
 
