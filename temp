@@ -1,41 +1,64 @@
-# 1. Add these variables before the main loop
-loss_notification = None  # Store any loss notification for other players
-player_lost = False  # Flag to track if the current player lost
+import socket
+import random
+import time
+from multiprocessing import Process, Manager, Lock
+import threading
+import tkinter as tk
+from tkinter.simpledialog import askstring
+from tkinter import messagebox
 
-while True:
-    # ... [Your other code]
+# ... (your existing Tron game code)
 
-    data_end = client_socket.recv(1024).decode('utf-8')
-    if data_end == STOP:
-        break
+# Chat server constants
+CHAT_SERVER_HOST = '127.0.0.1'
+CHAT_SERVER_PORT = 55555
 
-    # 2. Handle "loss" message from server
-    if ",loss" in data_end:
-        loser_code = data_end.split(",")[0]
-        if loser_code == player_code:
-            player_lost = True
+# ...
+
+# Chat server functions
+
+# Handle incoming chat messages from clients
+def chat_handler(client_socket):
+    nickname = client_socket.recv(1024).decode('utf-8')
+    nicknames.append(nickname)
+    clients.append(client_socket)
+
+    broadcast(f'{nickname} has joined the chat!\n'.encode('utf-8'))
+
+    while True:
+        try:
+            message = client_socket.recv(1024)
+            broadcast(message, sender=nickname)
+        except:
+            index = clients.index(client_socket)
+            clients.remove(client_socket)
+            client_socket.close()
+            nickname = nicknames[index]
+            broadcast(f'{nickname} has left the chat!\n'.encode('utf-8'))
+            nicknames.remove(nickname)
+            break
+
+# Broadcast a message to all clients
+def broadcast(message, sender=None):
+    for client in clients:
+        if sender:
+            client.send(f'{sender}: '.encode('utf-8') + message)
         else:
-            loss_notification = f"{loser_code} lost"
+            client.send(message)
 
-    # 3. Display the appropriate message or box based on the above
+# Chat server setup
+chat_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+chat_server.bind((CHAT_SERVER_HOST, CHAT_SERVER_PORT))
+chat_server.listen(5)
+print(f"Chat server started on {CHAT_SERVER_HOST}:{CHAT_SERVER_PORT}, waiting for connections...")
 
-    # For other players' loss notification
-    if loss_notification:
-        font = pygame.font.SysFont(None, 36)
-        label = font.render(loss_notification, True, (255, 0, 0))
-        screen.blit(label, (screen.get_width() - label.get_width() - 10, 10))
+# Thread to handle chat clients
+chat_thread = threading.Thread(target=accept_clients)
+chat_thread.start()
 
-    # For current player's loss
-    if player_lost:
-        # Draw a rectangle in the center
-        rect_width = 300
-        rect_height = 100
-        pygame.draw.rect(screen, (0, 0, 128), (screen.get_width() // 2 - rect_width // 2, screen.get_height() // 2 - rect_height // 2, rect_width, rect_height))
-        
-        font = pygame.font.SysFont(None, 36)
-        label = font.render("You LOST", True, (255, 255, 255))
-        screen.blit(label, (screen.get_width() // 2 - label.get_width() // 2, screen.get_height() // 2 - label.get_height() // 2))
+# ...
 
-    pygame.display.flip()  # renew the print
+if _name_ == "_main_":
+    # ... (your existing Tron game code)
 
-    # ... [Your other code]
+    # Continue with the rest of your Tron game code

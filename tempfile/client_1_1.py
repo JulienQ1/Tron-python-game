@@ -57,7 +57,7 @@ player_images_little = {
 
 #to define some figure
 
-def login_screen(screen, font, bg_image_path="background_mainmenu.jpg", button_image_path="login_button.png"):
+def login_screen(screen, font, bg_image_path="background.jpg", button_image_path="login_button.png"):
     username = ''
     screen_width, screen_height = screen.get_size()
 
@@ -316,9 +316,6 @@ while True:
 
 
 #main loop below
-background = pygame.image.load("background.jpg")
-screen_width, screen_height = screen.get_size()
-background = pygame.transform.scale(background, (screen_width, screen_height))
 
 # print a gray platform in the middle of screen
 center_x = (screen.get_width() - 600) // 2
@@ -339,12 +336,12 @@ data_end = ""
 while True:
     start_time = time.time()
     screen.fill((0, 0, 0))  # clean the screen
-    screen.blit(background, (0, 0))
+
     # show grey in middle
     center_x = (screen.get_width() - 600) // 2
     center_y = (screen.get_height() - 600) // 2
-    pygame.draw.rect(screen, (0, 0, 0), (center_x, center_y, 600, 600))
-    
+    pygame.draw.rect(screen, (128, 128, 128), (center_x, center_y, 600, 600))
+
     # renew the trace on trail_surface
     #player_positions = get_player_positions_from_server(client_socket)
     getted_data = get_player_positions_from_server(client_socket)

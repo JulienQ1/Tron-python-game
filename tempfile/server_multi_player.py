@@ -2,10 +2,6 @@ import socket
 import random
 import time
 from multiprocessing import Process, Manager, Lock
-import threading
-import tkinter as tk
-from tkinter.simpledialog import askstring
-from tkinter import messagebox
 
 #some print used to debug and test
 
@@ -167,9 +163,6 @@ def handle_client(client_socket, game_grid, player_positions,allocated_codes,loc
                     positions = ','.join([f"{code}:{x}-{y}" for code, (x, y) in player_positions.items()])
                     #client_socket.sendall(positions.encode('utf-8'))
                     client_socket.sendall((positions + SINGAL_END).encode('utf-8'))
-
-def chat_handler(client_scoket):
-
 
 if __name__ == "__main__":
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

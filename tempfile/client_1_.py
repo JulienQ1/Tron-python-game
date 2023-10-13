@@ -5,9 +5,6 @@ import time #to count and control the time of a loop
 SERVER_IP = "127.0.0.1"#input("Please enter a server address (127.0.0.1 for test in computer)")
 SERVER_PORT = 6868#int(input("Please enter a server port"))
 
-CHAT_SERVER_HOST = '127.0.0.1'
-CHAT_SERVER_PORT = 55555
-
 SINGAL_END = "/END"
 SINGAL_REQUEST ="SIG_RE"
 SINGAL_SEND = "SIG_SE"
@@ -57,33 +54,24 @@ player_images_little = {
 
 #to define some figure
 
-def login_screen(screen, font, bg_image_path="background_mainmenu.jpg", button_image_path="login_button.png"):
+def login_screen(screen, font):
     username = ''
-    screen_width, screen_height = screen.get_size()
+    screen_width, screen_height = screen.get_size()  # get the size of screen
 
-    # Load the background image
-    background = pygame.image.load(bg_image_path)
-    background = pygame.transform.scale(background, (screen_width, screen_height))
-
-    # Load the login button image
-    button = pygame.image.load(button_image_path)
-    button_width, button_height = button.get_size()
-
-    # Define button position
-    button_x = (screen_width - button_width) / 2
-    button_y = screen_height / 2 + 50  # 50 pixels below the input box
-
+    # draw "Please enter the user name:" text
     prompt_text_surface = font.render('Please enter the user name:', True, (255, 255, 255))
-    prompt_text_width, prompt_text_height = prompt_text_surface.get_size()
+    prompt_text_width, prompt_text_height = prompt_text_surface.get_size()  # get size of text
+
+    # calculate the position of text to make them middle
     prompt_text_position_x = (screen_width - prompt_text_width) / 2
     prompt_text_position_y = (screen_height / 2) - prompt_text_height - 10
 
-    input_box_width = 200
+    input_box_width = 200  # could be changed
     input_box_height = 32
     input_box_x = (screen_width - input_box_width) / 2
     input_box_y = screen_height / 2
-    input_box = pygame.Rect(input_box_x, input_box_y, input_box_width, input_box_height)
 
+    input_box = pygame.Rect(input_box_x, input_box_y, input_box_width, input_box_height)
     color_inactive = pygame.Color('lightskyblue3')
     color_active = pygame.Color('dodgerblue2')
     color = color_inactive
@@ -93,30 +81,23 @@ def login_screen(screen, font, bg_image_path="background_mainmenu.jpg", button_i
     while running:
         screen.fill((0, 0, 0))
 
-        # Draw the background image
-        screen.blit(background, (0, 0))
-        
+        # draw text and input area
         screen.blit(prompt_text_surface, (prompt_text_position_x, prompt_text_position_y))
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-                return None
+                return None  # Return None if user closes the window
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if input_box.collidepoint(event.pos):
                     active = not active
                 else:
                     active = False
                 color = color_active if active else color_inactive
-                
-                # Check for login button press
-                if button_x <= event.pos[0] <= button_x + button_width and button_y <= event.pos[1] <= button_y + button_height:
-                    return username
-
             if event.type == pygame.KEYDOWN:
                 if active:
                     if event.key == pygame.K_RETURN:
-                        return username
+                        return username  # Return the username if the user presses enter
                     elif event.key == pygame.K_BACKSPACE:
                         username = username[:-1]
                     else:
@@ -127,9 +108,6 @@ def login_screen(screen, font, bg_image_path="background_mainmenu.jpg", button_i
         input_box.w = width
         screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
         pygame.draw.rect(screen, color, input_box, 2)
-        
-        # Draw the button
-        screen.blit(button, (button_x, button_y))
 
         pygame.display.flip()
 
@@ -178,13 +156,8 @@ def get_player_code(connection):
 
 
 # define a function to draw the waiting screen
-def draw_waiting_screen(screen,player_code,waiting_background_path = "waiting_background.jpg" ):
-    screen_width, screen_height = screen.get_size()
-    
+def draw_waiting_screen(player_code):
     screen.fill((0, 0, 0))  # fill the screen with black
-    background = pygame.image.load(waiting_background_path)
-    background = pygame.transform.scale(background, (screen_width, screen_height))
-    screen.blit(background, (0, 0))
 
     # display the user code on left down
     font_small = pygame.font.Font(None, 32)
@@ -311,14 +284,11 @@ while True:
         print("Game will start")
         break
     else:
-        draw_waiting_screen(screen,player_code)
+        draw_waiting_screen(player_code)
         time.sleep(1)
 
 
 #main loop below
-background = pygame.image.load("background.jpg")
-screen_width, screen_height = screen.get_size()
-background = pygame.transform.scale(background, (screen_width, screen_height))
 
 # print a gray platform in the middle of screen
 center_x = (screen.get_width() - 600) // 2
@@ -339,12 +309,12 @@ data_end = ""
 while True:
     start_time = time.time()
     screen.fill((0, 0, 0))  # clean the screen
-    screen.blit(background, (0, 0))
+
     # show grey in middle
     center_x = (screen.get_width() - 600) // 2
     center_y = (screen.get_height() - 600) // 2
-    pygame.draw.rect(screen, (0, 0, 0), (center_x, center_y, 600, 600))
-    
+    pygame.draw.rect(screen, (128, 128, 128), (center_x, center_y, 600, 600))
+
     # renew the trace on trail_surface
     #player_positions = get_player_positions_from_server(client_socket)
     getted_data = get_player_positions_from_server(client_socket)
