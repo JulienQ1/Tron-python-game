@@ -397,6 +397,7 @@ while True:
         font = pygame.font.SysFont(None, 36)
         label = font.render(loss_notification, True, (255, 0, 0))
         screen.blit(label, (screen.get_width() - label.get_width() - 10, 10))
+        break
 
     # For current player's loss
     if player_lost:

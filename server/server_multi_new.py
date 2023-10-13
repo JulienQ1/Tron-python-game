@@ -20,6 +20,11 @@ SINGAL_REQUEST ="SIG_RE"
 SINGAL_SEND = "SIG_SE"
 SINGAL_GET = "SIG_SEN"
 
+LEFT_BORDER = 90
+RIGHT_BORDER = 670
+UP_BORDER = 0
+DOWN_BORDER = 580
+
 #Grid constants
 #Build and initialized the grid
 GRID_SIZE = 1
@@ -82,7 +87,7 @@ def handle_client(client_socket, game_grid, player_positions,allocated_codes,loc
                     time.sleep(0.1)
                 print("Game start at", index)
                 with lock:
-                    player_positions[assigned_code] = (random.randint(100, 590)*GRID_SIZE, random.randint(0, 590)*GRID_SIZE)
+                    player_positions[assigned_code] = (random.randint(LEFT_BORDER + 20, RIGHT_BORDER - 20)*GRID_SIZE, random.randint(UP_BORDER + 20, DOWN_BORDER - 20)*GRID_SIZE)
                     client_socket.sendall(GAME_START.encode('utf-8'))
                 while True:
                     client_socket.settimeout(0.01)
@@ -91,22 +96,27 @@ def handle_client(client_socket, game_grid, player_positions,allocated_codes,loc
                         #print("move signal",move_command,"in thread",index)
                         player_code, direction = move_command[0], move_command[1]
                         x, y = player_positions[player_code]
-                        grid_current_x, grid_current_y = (x - 100) // GRID_SIZE, y // GRID_SIZE
+                        grid_current_x, grid_current_y = (x - LEFT_BORDER) // GRID_SIZE, y // GRID_SIZE
                         with lock:
                             old_place[player_code]=player_positions[player_code]
-                        if direction == "up" and y > 0:
+                        if direction == "up" and y > UP_BORDER:
                             y -= GRID_SIZE
-                        elif direction == "down" and y < 580:
+                        elif direction == "down" and y < DOWN_BORDER:
                             y += GRID_SIZE
-                        elif direction == "left" and x > 90:
+                        elif direction == "left" and x > LEFT_BORDER:
                             x -= GRID_SIZE
-                        elif direction == "right" and x < 670:
+                        elif direction == "right" and x < RIGHT_BORDER:
                             x += GRID_SIZE
                         #print(game_grid)
-                        grid_x, grid_y = (x - 100) // GRID_SIZE, y // GRID_SIZE
+                        grid_x, grid_y = (x - LEFT_BORDER) // GRID_SIZE, y // GRID_SIZE
                         if game_grid[grid_y][grid_x] == "used":
                             print([player_code],"loss at",[index])
                             client_socket.sendall(f"{player_code},loss".encode('utf-8'))
+                            break
+                        elif (y <= UP_BORDER or y >= DOWN_BORDER) or (x <= LEFT_BORDER or x >= RIGHT_BORDER):
+                            print([player_code],"loss at",[index])
+                            client_socket.sendall(f"{player_code},loss".encode('utf-8')) 
+                            break                          
                         else:
                             with lock:
                                 player_positions[player_code]=(x,y)
@@ -125,11 +135,16 @@ def handle_client(client_socket, game_grid, player_positions,allocated_codes,loc
                             
                             x_move = x1 + delta_x * SPEED
                             y_move = y1 + delta_y * SPEED
-                            grid_x_delta, grid_y_delta = (x_move - 100) // GRID_SIZE, y_move // GRID_SIZE
+                            grid_x_delta, grid_y_delta = (x_move - LEFT_BORDER) // GRID_SIZE, y_move // GRID_SIZE
 
 
                             if game_grid[grid_y_delta][grid_x_delta] == "used":
                                 client_socket.sendall(f"{player_code},loss".encode('utf-8'))
+                                break
+                            elif (y_move <= UP_BORDER or y_move >= DOWN_BORDER) or (x_move <= LEFT_BORDER or x_move >= RIGHT_BORDER):
+                                print([player_code],"loss at",[index])
+                                client_socket.sendall(f"{player_code},loss".encode('utf-8'))
+                                break 
                             else:
                                 with lock:
                                     old_place[assigned_code] = new_place [assigned_code]
@@ -137,7 +152,7 @@ def handle_client(client_socket, game_grid, player_positions,allocated_codes,loc
                                     new_place[assigned_code] = (x_move,y_move)
                                 if old_place[assigned_code] != new_place[assigned_code]:
                                     x_old, y_old = old_place[assigned_code]
-                                    grid_old_x, grid_old_y = (x_old - 100) // GRID_SIZE, y_old // GRID_SIZE
+                                    grid_old_x, grid_old_y = (x_old - LEFT_BORDER) // GRID_SIZE, y_old // GRID_SIZE
                                     with lock:
                                         new_row_auto = game_grid[grid_old_y][:]
                                         new_row_auto[grid_old_x] = "used"
