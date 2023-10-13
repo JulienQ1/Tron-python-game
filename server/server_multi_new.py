@@ -119,7 +119,6 @@ def handle_client(client_socket, game_grid, player_positions,allocated_codes,loc
                     except socket.timeout:
                         x0, y0 = old_place[assigned_code]
                         x1, y1 = new_place[assigned_code]
-                        grid_current_x, grid_current_y = (x0 - 100) // GRID_SIZE, y0 // GRID_SIZE
                         delta_x = x1 - x0
                         delta_y = y1 - y0
                         if delta_x != 0 or delta_y != 0:
@@ -133,11 +132,17 @@ def handle_client(client_socket, game_grid, player_positions,allocated_codes,loc
                                 client_socket.sendall(f"{player_code},loss".encode('utf-8'))
                             else:
                                 with lock:
-                                    print(x_move," ",y_move,)
-                                    game_grid[grid_current_y][grid_current_x] = "used"
                                     old_place[assigned_code] = new_place [assigned_code]
                                     player_positions[assigned_code] = (x_move,y_move)
                                     new_place[assigned_code] = (x_move,y_move)
+                                if old_place[assigned_code] != new_place[assigned_code]:
+                                    x_old, y_old = old_place[assigned_code]
+                                    grid_old_x, grid_old_y = (x_old - 100) // GRID_SIZE, y_old // GRID_SIZE
+                                    with lock:
+                                        new_row_auto = game_grid[grid_old_y][:]
+                                        new_row_auto[grid_old_x] = "used"
+                                        game_grid[grid_old_y] = new_row
+
                         #below code for auto move
 
                     positions = ','.join([f"{code}:{x}-{y}" for code, (x, y) in player_positions.items()])
