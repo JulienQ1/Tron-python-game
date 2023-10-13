@@ -14,7 +14,11 @@ LOGIN_FAIL = "login_fail"
 PLAYER_CODES = ["A", "B", "C", "D"]
 GAME_START = "game_start"
 SPEED = 1
+
 SINGAL_END = "/END"
+SINGAL_REQUEST ="SIG_RE"
+SINGAL_SEND = "SIG_SE"
+SINGAL_GET = "SIG_SEN"
 
 #Grid constants
 #Build and initialized the grid
@@ -22,6 +26,7 @@ GRID_SIZE = 1
 GAME_AREA_SIZE = 600
 GRID_COUNT = GAME_AREA_SIZE // GRID_SIZE
 #value of shared_char, to control game:
+
 START = 'S'
 INIT = "I"
 
@@ -79,26 +84,27 @@ def handle_client(client_socket, game_grid, player_positions,allocated_codes,loc
                 with lock:
                     player_positions[assigned_code] = (random.randint(100, 590)*GRID_SIZE, random.randint(0, 590)*GRID_SIZE)
                     client_socket.sendall(GAME_START.encode('utf-8'))
+                
                 #don't know wether should use lock, remove if needn't
                 while True:
                     client_socket.settimeout(0.01)
                     try:
                         move_command = client_socket.recv(1024).decode('utf-8').split(',')
+                        print("move signal",move_command,"in thread",index)
                         player_code, direction = move_command[0], move_command[1]
                         x, y = player_positions[player_code]
-                        print(player_positions[player_code])
                         grid_current_x, grid_current_y = (x - 100) // GRID_SIZE, y // GRID_SIZE
                         with lock:
                             old_place[player_code] = player_positions[player_code]
 
                         if direction == "up" and y > 0:
-                            y -= GRID_SIZE
+                            y -= 100#GRID_SIZE
                         elif direction == "down" and y < 580:
-                            y += GRID_SIZE
+                            y += 100#GRID_SIZE
                         elif direction == "left" and x > 90:
-                            x -= GRID_SIZE
+                            x -= 100#GRID_SIZE
                         elif direction == "right" and x < 670:
-                            x += GRID_SIZE
+                            x += 100#GRID_SIZE
                         print(game_grid)
                         grid_x, grid_y = (x - 100) // GRID_SIZE, y // GRID_SIZE
                         if game_grid[grid_y][grid_x] == "used":
@@ -162,7 +168,7 @@ def handle_client(client_socket, game_grid, player_positions,allocated_codes,loc
                                     game_grid[grid_y_delta][grid_x_delta] = "used"
                         '''
                     positions = ','.join([f"{code}:{x}-{y}" for code, (x, y) in player_positions.items()])
-                    client_socket.sendall(positions.encode('utf-8'))
+                    #client_socket.sendall(positions.encode('utf-8'))
                     client_socket.sendall((positions + SINGAL_END).encode('utf-8'))
 
 if __name__ == "__main__":

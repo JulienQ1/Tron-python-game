@@ -6,7 +6,12 @@ SERVER_IP = "172.21.72.240" #The IP of the server
 SERVER_PORT = 6859 #The port used of server
 CLIENT_IP = "127.0.0.1" #The IP of client
 CLIENT_PORT = 6859 #The port used by client
+
 SINGAL_END = "/END"
+SINGAL_REQUEST ="SIG_RE"
+SINGAL_SEND = "SIG_SE"
+SINGAL_GET = "SIG_SEN"
+
 LOGIN_SUC = "login_success" #The message given by server that means username is right
 LOGIN_FAIL = "login_fail"
 FPS = 60 #how many loops every second
