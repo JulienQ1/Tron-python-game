@@ -6,8 +6,8 @@ from multiprocessing import Process, Manager, Lock
 #some print used to debug and test
 
 # Server constants
-SERVER_IP = input("Please enter a server address (127.0.0.1 for test in computer)")
-SERVER_PORT = int(input("Please enter a server port"))
+SERVER_IP = "127.0.0.1"#input("Please enter a server address (127.0.0.1 for test in computer)")
+SERVER_PORT = 6868 #int(input("Please enter a server port"))
 ALLOWED_USERNAMES = ["1111", "2222", "3333", "4444"]
 LOGIN_SUC = "login_success"
 LOGIN_FAIL = "login_fail"

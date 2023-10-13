@@ -2,8 +2,8 @@ import pygame
 import socket
 import time #to count and control the time of a loop
 
-SERVER_IP = input("Please enter a server address (127.0.0.1 for test in computer)")
-SERVER_PORT = int(input("Please enter a server port"))
+SERVER_IP = "127.0.0.1"#input("Please enter a server address (127.0.0.1 for test in computer)")
+SERVER_PORT = 6868#int(input("Please enter a server port"))
 
 SINGAL_END = "/END"
 SINGAL_REQUEST ="SIG_RE"
@@ -360,6 +360,7 @@ while True:
         loser_code = data_end.split(",")[0]
         if loser_code == player_code:
             player_lost = True
+            break
         else:
             loss_notification = f"{loser_code} lost"
 
@@ -370,18 +371,6 @@ while True:
         font = pygame.font.SysFont(None, 36)
         label = font.render(loss_notification, True, (255, 0, 0))
         screen.blit(label, (screen.get_width() - label.get_width() - 10, 10))
-        break
-
-    # For current player's loss
-    if player_lost:
-        # Draw a rectangle in the center
-        rect_width = 300
-        rect_height = 100
-        pygame.draw.rect(screen, (0, 0, 128), (screen.get_width() // 2 - rect_width // 2, screen.get_height() // 2 - rect_height // 2, rect_width, rect_height))
-        
-        font = pygame.font.SysFont(None, 36)
-        label = font.render("You LOST", True, (255, 255, 255))
-        screen.blit(label, (screen.get_width() // 2 - label.get_width() // 2, screen.get_height() // 2 - label.get_height() // 2))
 
     pygame.display.flip()  # renew the print
 
@@ -397,6 +386,17 @@ while True:
     data_end = client_socket.recv(1024).decode('utf-8')
     if data_end == STOP:
         break
-
-
+while True:
+    rect_width = 300
+    rect_height = 100
+    pygame.draw.rect(screen, (0, 0, 128), (screen.get_width() // 2 - rect_width // 2, screen.get_height() // 2 - rect_height // 2, rect_width, rect_height))
+        
+    font = pygame.font.SysFont(None, 36)
+    label = font.render("You LOST", True, (255, 255, 255))
+    screen.blit(label, (screen.get_width() // 2 - label.get_width() // 2, screen.get_height() // 2 - label.get_height() // 2))
+    player_end = input("Game over , N to end")
+    if player_end == "N":
+        break
+    else:
+        time.sleep(1)
 client_socket.close()
